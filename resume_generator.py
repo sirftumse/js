@@ -130,193 +130,55 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# Initialize session state with ALL fields
+# Helper function for safe dictionary access
+def safe_get(data, *keys, default=''):
+    """Safely get nested dictionary values without throwing errors"""
+    try:
+        for key in keys:
+            if isinstance(data, dict):
+                data = data.get(key, default)
+            else:
+                return default
+        return data if data is not None else default
+    except (TypeError, AttributeError):
+        return default
+
+# Initialize session state with BLANK fields (no default data)
 def init_session_state():
-    if 'resume_data' not in st.session_state:
-        st.session_state.resume_data = {
-            'personal': {
-                'name': 'SOMBIR',
-                'email': 'sombirdalal91@gmail.com',
-                'phone': '+91-7827544053',
-                'address': 'Pivotal Paradise, Flat No 703, T-4, Sector 62',
-                'city': 'Gurugram',
-                'state': 'Haryana',
-                'pin': '122011',
-                'linkedin': 'linkedin.com/in/sombir',
-                'website': '',
-                'title': 'Hospitality Professional | F&B Operations Expert'
-            },
-            'profile_image': None,
-            'summary': 'Dedicated hospitality professional with over 13 years of experience in Food & Beverage operations and restaurant management. Proven track record of driving revenue growth, enhancing guest satisfaction, and building high-performance teams.',
-            'objective': 'To leverage 13+ years of hospitality expertise in a challenging management role where I can drive operational excellence and team development.',
-            'experience': [
-                {
-                    'id': 'exp_1',
-                    'company': 'CLOCK TOWER (HT Hospitality)',
-                    'location': 'Gurugram',
-                    'position': 'Restaurant Manager',
-                    'start_date': 'April 2022',
-                    'end_date': 'Present',
-                    'current': True,
-                    'description': [
-                        'Oversee complete restaurant operations managing 50+ team members',
-                        'Lead team performance initiatives resulting in 25% increase in efficiency',
-                        'Ensure superior guest experience through service excellence',
-                        'Develop and implement SOPs and training modules',
-                        'Execute promotional strategies contributing to 30% revenue growth'
-                    ]
-                },
-                {
-                    'id': 'exp_2',
-                    'company': 'CLOCK TOWER (HT Hospitality)',
-                    'location': 'Gurugram',
-                    'position': 'Assistant Restaurant Manager',
-                    'start_date': 'May 2017',
-                    'end_date': 'March 2022',
-                    'current': False,
-                    'description': [
-                        'Assisted in managing daily restaurant operations',
-                        'Supervised staff and ensured service quality',
-                        'Handled guest complaints and feedback',
-                        'Supported revenue growth initiatives'
-                    ]
-                },
-                {
-                    'id': 'exp_3',
-                    'company': 'SODA BOTTLE OPENER',
-                    'location': 'Delhi NCR',
-                    'position': 'Area Bar Manager',
-                    'start_date': 'Nov 2015',
-                    'end_date': 'April 2017',
-                    'current': False,
-                    'description': [
-                        'Managed bar operations across multiple locations',
-                        'Implemented inventory control systems reducing waste by 15%',
-                        'Created innovative beverage menus and curated wine selections',
-                        'Developed training programs for 100+ staff members',
-                        'Enhanced guest engagement scores by 40%'
-                    ]
-                },
-                {
-                    'id': 'exp_4',
-                    'company': 'OLIVE BAR & KITCHEN',
-                    'location': 'Delhi',
-                    'position': 'Senior Bartender',
-                    'start_date': 'June 2014',
-                    'end_date': 'Oct 2015',
-                    'current': False,
-                    'description': [
-                        'Led bar operations during peak hours',
-                        'Assisted in menu development and cocktail innovation',
-                        'Trained junior staff on mixology techniques'
-                    ]
-                },
-                {
-                    'id': 'exp_5',
-                    'company': 'CHILLIES',
-                    'location': 'Delhi',
-                    'position': 'Bartender',
-                    'start_date': 'April 2013',
-                    'end_date': 'May 2014',
-                    'current': False,
-                    'description': [
-                        'Managed bar counter operations',
-                        'Maintained inventory and hygiene standards'
-                    ]
-                },
-                {
-                    'id': 'exp_6',
-                    'company': 'SHANGRI-LA EROS',
-                    'location': 'Delhi',
-                    'position': 'Bartender',
-                    'start_date': 'May 2012',
-                    'end_date': 'March 2013',
-                    'current': False,
-                    'description': [
-                        'Supported bar team during high-volume service',
-                        'Ensured quality and consistency'
-                    ]
-                },
-                {
-                    'id': 'exp_7',
-                    'company': 'SHANGRI-LA EROS',
-                    'location': 'Delhi',
-                    'position': 'Industrial Trainee',
-                    'start_date': 'June 2010',
-                    'end_date': 'Nov 2010',
-                    'current': False,
-                    'description': [
-                        'Gained foundational experience in luxury hotel operations',
-                        'Assisted various departments'
-                    ]
-                }
-            ],
-            'education': [
-                {
-                    'id': 'edu_1',
-                    'degree': 'Bachelor in Hotel Management',
-                    'institution': 'Kurukshetra University',
-                    'year': '2012',
-                    'grade': 'First Class',
-                    'specialization': 'Hospitality Management'
-                },
-                {
-                    'id': 'edu_2',
-                    'degree': 'Intermediate (CBSE)',
-                    'institution': 'CBSE Board',
-                    'year': '2008',
-                    'grade': '',
-                    'specialization': ''
-                },
-                {
-                    'id': 'edu_3',
-                    'degree': 'High School (CBSE)',
-                    'institution': 'CBSE Board',
-                    'year': '2006',
-                    'grade': '',
-                    'specialization': ''
-                }
-            ],
-            'skills': {
-                'Leadership': ['Team Leadership', 'Staff Training', 'Performance Management', 'Revenue Growth', 'Strategic Planning'],
-                'Operations': ['Inventory Control', 'SOP Development', 'Guest Relations', 'Quality Assurance', 'Cost Optimization'],
-                'Technical': ['Beverage Menu Planning', 'Wine Selection', 'Mixology', 'POS Systems', 'Inventory Software'],
-                'Soft Skills': ['Communication', 'Problem Solving', 'Time Management', 'Adaptability', 'Customer Focus']
-            },
-            'certifications': [
-                {
-                    'id': 'cert_1',
-                    'name': 'Certified Hospitality Supervisor',
-                    'issuer': 'AHLEI',
-                    'year': '2018'
-                },
-                {
-                    'id': 'cert_2',
-                    'name': 'Advanced Mixology Certificate',
-                    'issuer': 'BarSmarts',
-                    'year': '2015'
-                }
-            ],
-            'languages': [
-                {'id': 'lang_1', 'name': 'English', 'proficiency': 'Fluent'},
-                {'id': 'lang_2', 'name': 'Hindi', 'proficiency': 'Native'}
-            ],
-            'achievements': [
-                '25% increase in operational efficiency',
-                '30% revenue growth through promotional strategies',
-                '15% waste reduction through inventory control',
-                '40% improvement in guest engagement scores',
-                'Employee of the Month - 3 times'
-            ],
-            'personal_details': {
-                'father_name': 'Sh. Kartar Singh',
-                'dob': '21st December, 1991',
-                'marital_status': 'Married',
-                'nationality': 'Indian',
-                'gender': 'Male'
-            },
-            'custom_sections': []
-        }
+    """Initialize or reset session state with BLANK data"""
+    default_data = {
+        'personal': {
+            'name': '',
+            'email': '',
+            'phone': '',
+            'address': '',
+            'city': '',
+            'state': '',
+            'pin': '',
+            'linkedin': '',
+            'website': '',
+            'title': ''
+        },
+        'profile_image': None,
+        'summary': '',
+        'objective': '',
+        'experience': [],  # Empty list - user will add
+        'education': [],    # Empty list - user will add
+        'skills': {},       # Empty dict - user will add
+        'certifications': [], # Empty list - user will add
+        'languages': [],    # Empty list - user will add
+        'achievements': [],  # Empty list - user will add
+        'personal_details': {
+            'father_name': '',
+            'dob': '',
+            'marital_status': '',
+            'nationality': '',
+            'gender': ''
+        },
+        'custom_sections': []
+    }
+    
+    st.session_state.resume_data = default_data
     
     if 'selected_template' not in st.session_state:
         st.session_state.selected_template = 'style1_v1'
@@ -335,6 +197,15 @@ def init_session_state():
     
     if 'word_data' not in st.session_state:
         st.session_state.word_data = None
+
+# Safe reset function
+def safe_reset():
+    """Safely reset all session state to blank"""
+    # Clear all existing session state
+    for key in list(st.session_state.keys()):
+        del st.session_state[key]
+    # Reinitialize with blank data
+    init_session_state()
 
 # Generate 105+ Template Variations from the 3 Base Styles
 def generate_template_variations():
@@ -419,46 +290,51 @@ def generate_style1_html(template_id, data):
     colors = template['colors']
     
     years_exp = 13
-    total_skills = sum(len(skills) for skills in data['skills'].values())
+    total_skills = sum(len(skills) for skills in data['skills'].values()) if data['skills'] else 0
     
     # Photo handling
     photo_html = ""
     if data.get('profile_image'):
         photo_html = f'<img src="{data["profile_image"]}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;" alt="Profile">'
     else:
-        photo_html = f'<span style="font-size:60px; color:white;">{data["personal"]["name"][0]}</span>'
+        photo_html = f'<span style="font-size:60px; color:white;">{data["personal"]["name"][0] if data["personal"]["name"] else "?"}</span>'
     
     # Build skills as comma-separated text
     all_skills = []
-    for category, skills in data['skills'].items():
-        all_skills.extend(skills)
-    skills_text = " • ".join(all_skills)
+    if data['skills']:
+        for category, skills in data['skills'].items():
+            all_skills.extend(skills)
+    skills_text = " • ".join(all_skills) if all_skills else "Add skills in the editor"
     
     # Build education
     edu_html = ""
     for edu in data['education']:
         edu_html += f"""
             <div style="margin-bottom: 15px; padding-left: 10px; border-left: 3px solid {colors['secondary']};">
-                <div style="color: {colors['accent']}; font-weight: bold;">{edu['year']}</div>
-                <div style="font-weight: bold;">{edu['degree']}</div>
-                <div style="color: #888;">{edu['institution']}</div>
+                <div style="color: {colors['accent']}; font-weight: bold;">{edu['year'] if edu.get('year') else 'Year'}</div>
+                <div style="font-weight: bold;">{edu['degree'] if edu.get('degree') else 'Degree'}</div>
+                <div style="color: #888;">{edu['institution'] if edu.get('institution') else 'Institution'}</div>
                 {f'<div style="color: {colors["accent"]};">{edu["grade"]}</div>' if edu.get('grade') else ''}
             </div>
         """
+    if not data['education']:
+        edu_html = '<div style="color: #888; font-style: italic;">No education added. Click "Edit All Sections" to add.</div>'
     
     # Build certifications
     cert_html = ""
     for cert in data['certifications']:
         cert_html += f"""
             <div style="margin-bottom: 15px; padding-left: 10px; border-left: 3px solid {colors['secondary']};">
-                <div style="color: {colors['accent']}; font-weight: bold;">{cert['year']}</div>
-                <div style="font-weight: bold;">{cert['name']}</div>
-                <div style="color: #888;">{cert['issuer']}</div>
+                <div style="color: {colors['accent']}; font-weight: bold;">{cert['year'] if cert.get('year') else 'Year'}</div>
+                <div style="font-weight: bold;">{cert['name'] if cert.get('name') else 'Certification'}</div>
+                <div style="color: #888;">{cert['issuer'] if cert.get('issuer') else 'Issuer'}</div>
             </div>
         """
+    if not data['certifications']:
+        cert_html = '<div style="color: #888; font-style: italic;">No certifications added.</div>'
     
     # Build languages
-    lang_text = "  •  ".join([f"{l['name']} ({l['proficiency']})" for l in data['languages']])
+    lang_text = "  •  ".join([f"{l['name']} ({l['proficiency']})" for l in data['languages']]) if data['languages'] else "Add languages in editor"
     
     # Build experience
     exp_html = ""
@@ -466,20 +342,27 @@ def generate_style1_html(template_id, data):
         exp_html += f"""
             <div style="margin-bottom: 25px;">
                 <div style="display: flex; justify-content: space-between; margin-bottom: 5px; flex-wrap: wrap;">
-                    <span style="font-size: 18px; font-weight: bold; color: {colors['primary']};">{exp['company']}</span>
-                    <span style="color: {colors['secondary']}; font-weight: 600;">{exp['start_date']} - {exp['end_date']}</span>
+                    <span style="font-size: 18px; font-weight: bold; color: {colors['primary']};">{exp['company'] if exp.get('company') else 'Company'}</span>
+                    <span style="color: {colors['secondary']}; font-weight: 600;">{exp['start_date'] if exp.get('start_date') else 'Start'} - {exp['end_date'] if exp.get('end_date') else 'End'}</span>
                 </div>
-                <div style="font-size: 16px; color: #666; margin-bottom: 10px; font-style: italic;">{exp['position']} | {exp['location']}</div>
+                <div style="font-size: 16px; color: #666; margin-bottom: 10px; font-style: italic;">{exp['position'] if exp.get('position') else 'Position'} | {exp['location'] if exp.get('location') else 'Location'}</div>
                 <ul style="margin-left: 20px; margin-top: 5px;">
         """
-        for desc in exp['description']:
-            exp_html += f"<li style='margin-bottom: 5px;'>{desc}</li>"
+        if exp.get('description'):
+            for desc in exp['description']:
+                exp_html += f"<li style='margin-bottom: 5px;'>{desc}</li>"
+        else:
+            exp_html += "<li style='color: #888;'>Add description</li>"
         exp_html += "</ul></div>"
+    if not data['experience']:
+        exp_html = '<div style="color: #888; font-style: italic;">No experience added. Click "Edit All Sections" to add.</div>'
     
     # Build achievements
     ach_html = ""
     for achievement in data['achievements']:
         ach_html += f"<li style='margin-bottom: 5px;'>{achievement}</li>"
+    if not data['achievements']:
+        ach_html = '<li style="color: #888; font-style: italic;">No achievements added.</li>'
     
     personal = data['personal_details']
     
@@ -487,7 +370,7 @@ def generate_style1_html(template_id, data):
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>{data['personal']['name']} - Resume</title>
+    <title>{data['personal']['name'] if data['personal']['name'] else 'Your Name'} - Resume</title>
     <style>
         * {{
             margin: 0;
@@ -636,9 +519,9 @@ def generate_style1_html(template_id, data):
             </div>
             
             <div class="section-title">CONTACT</div>
-            <div class="contact-item">📧 {data['personal']['email']}</div>
-            <div class="contact-item">📱 {data['personal']['phone']}</div>
-            <div class="contact-item">📍 {data['personal']['city']}, {data['personal']['state']}</div>
+            <div class="contact-item">📧 {data['personal']['email'] if data['personal']['email'] else 'email@example.com'}</div>
+            <div class="contact-item">📱 {data['personal']['phone'] if data['personal']['phone'] else '+91 00000 00000'}</div>
+            <div class="contact-item">📍 {data['personal']['city'] if data['personal']['city'] else 'City'}, {data['personal']['state'] if data['personal']['state'] else 'State'}</div>
             
             <div class="section-title">CORE EXPERTISE</div>
             <div style="font-size: 13px; line-height: 1.6;">{skills_text}</div>
@@ -654,26 +537,26 @@ def generate_style1_html(template_id, data):
             
             <div class="section-title">PERSONAL DETAILS</div>
             <div class="personal-info">
-                <div class="info-row"><span class="info-label">Father:</span> {personal['father_name']}</div>
-                <div class="info-row"><span class="info-label">DOB:</span> {personal['dob']}</div>
-                <div class="info-row"><span class="info-label">Marital:</span> {personal['marital_status']}</div>
-                <div class="info-row"><span class="info-label">Nationality:</span> {personal['nationality']}</div>
+                <div class="info-row"><span class="info-label">Father:</span> {personal['father_name'] if personal.get('father_name') else 'Not specified'}</div>
+                <div class="info-row"><span class="info-label">DOB:</span> {personal['dob'] if personal.get('dob') else 'Not specified'}</div>
+                <div class="info-row"><span class="info-label">Marital:</span> {personal['marital_status'] if personal.get('marital_status') else 'Not specified'}</div>
+                <div class="info-row"><span class="info-label">Nationality:</span> {personal['nationality'] if personal.get('nationality') else 'Not specified'}</div>
             </div>
         </div>
         
         <div class="right-panel">
-            <h1 class="name">{data['personal']['name']}</h1>
-            <div class="title">{data['personal']['title']}</div>
+            <h1 class="name">{data['personal']['name'] if data['personal']['name'] else 'Your Name'}</h1>
+            <div class="title">{data['personal']['title'] if data['personal']['title'] else 'Professional Title'}</div>
             
             <div class="stats-grid">
-                <div class="stat-item"><div class="stat-number">{years_exp}+</div><div class="stat-label">Years Experience</div></div>
-                <div class="stat-item"><div class="stat-number">{len(data['experience'])}</div><div class="stat-label">Roles Held</div></div>
+                <div class="stat-item"><div class="stat-number">{len(data['experience'])}</div><div class="stat-label">Roles</div></div>
                 <div class="stat-item"><div class="stat-number">{len(data['education'])}</div><div class="stat-label">Degrees</div></div>
                 <div class="stat-item"><div class="stat-number">{total_skills}</div><div class="stat-label">Skills</div></div>
+                <div class="stat-item"><div class="stat-number">{len(data['certifications'])}</div><div class="stat-label">Certs</div></div>
             </div>
             
             <div class="section-title">PROFESSIONAL SUMMARY</div>
-            <p style="font-size: 14px; line-height: 1.6;">{data['summary']}</p>
+            <p style="font-size: 14px; line-height: 1.6;">{data['summary'] if data['summary'] else 'Add your professional summary in the editor.'}</p>
             
             <div class="section-title">WORK EXPERIENCE</div>
             {exp_html}
@@ -687,8 +570,8 @@ def generate_style1_html(template_id, data):
                 <p>I hereby declare that the information provided is true and correct.</p>
                 <div class="signature">
                     <span>Date: _____________</span>
-                    <span>Place: {data['personal']['city']}</span>
-                    <span style="font-weight: bold; color: {colors['primary']};">({data['personal']['name']})</span>
+                    <span>Place: {data['personal']['city'] if data['personal']['city'] else '______'}</span>
+                    <span style="font-weight: bold; color: {colors['primary']};">({data['personal']['name'] if data['personal']['name'] else 'Your Name'})</span>
                 </div>
             </div>
         </div>
@@ -703,48 +586,58 @@ def generate_style2_html(template_id, data):
     colors = template['colors']
     
     years_exp = 13
-    total_skills = sum(len(skills) for skills in data['skills'].values())
+    total_skills = sum(len(skills) for skills in data['skills'].values()) if data['skills'] else 0
     
     # Photo handling
     photo_html = ""
     if data.get('profile_image'):
         photo_html = f'<img src="{data["profile_image"]}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;" alt="Profile">'
     else:
-        photo_html = f'<span style="font-size:40px; color:{colors["primary"]};">{data["personal"]["name"][0]}</span>'
+        photo_html = f'<span style="font-size:40px; color:{colors["primary"]};">{data["personal"]["name"][0] if data["personal"]["name"] else "?"}</span>'
     
     # Build skills as badges
     skills_html = ""
-    for category, skills in data['skills'].items():
-        for skill in skills:
-            skills_html += f'<span style="display:inline-block; background:{colors["accent"]}; padding:5px 12px; border-radius:20px; margin:0 5px 10px 0; font-size:12px;">{skill}</span>'
+    if data['skills']:
+        for category, skills in data['skills'].items():
+            for skill in skills:
+                skills_html += f'<span style="display:inline-block; background:{colors["accent"]}; padding:5px 12px; border-radius:20px; margin:0 5px 10px 0; font-size:12px;">{skill}</span>'
+    else:
+        skills_html = '<span style="color: #888; font-style: italic;">Add skills in editor</span>'
     
     # Build education
     edu_html = ""
     for edu in data['education']:
         edu_html += f"""
             <div style="background:white; padding:12px; margin-bottom:12px; border-left:4px solid {colors['secondary']};">
-                <div style="color:{colors['secondary']}; font-weight:bold;">{edu['year']}</div>
-                <div style="font-weight:bold;">{edu['degree']}</div>
-                <div style="color:#666;">{edu['institution']}</div>
+                <div style="color:{colors['secondary']}; font-weight:bold;">{edu['year'] if edu.get('year') else 'Year'}</div>
+                <div style="font-weight:bold;">{edu['degree'] if edu.get('degree') else 'Degree'}</div>
+                <div style="color:#666;">{edu['institution'] if edu.get('institution') else 'Institution'}</div>
                 {f'<div style="color:{colors["secondary"]};">{edu["grade"]}</div>' if edu.get('grade') else ''}
             </div>
         """
+    if not data['education']:
+        edu_html = '<div style="color: #888; font-style: italic;">No education added.</div>'
     
     # Build certifications
     cert_html = ""
     for cert in data['certifications']:
         cert_html += f"""
             <div style="background:white; padding:12px; margin-bottom:12px; border-left:4px solid {colors['secondary']};">
-                <div style="color:{colors['secondary']}; font-weight:bold;">{cert['year']}</div>
-                <div style="font-weight:bold;">{cert['name']}</div>
-                <div style="color:#666;">{cert['issuer']}</div>
+                <div style="color:{colors['secondary']}; font-weight:bold;">{cert['year'] if cert.get('year') else 'Year'}</div>
+                <div style="font-weight:bold;">{cert['name'] if cert.get('name') else 'Certification'}</div>
+                <div style="color:#666;">{cert['issuer'] if cert.get('issuer') else 'Issuer'}</div>
             </div>
         """
+    if not data['certifications']:
+        cert_html = '<div style="color: #888; font-style: italic;">No certifications added.</div>'
     
     # Build languages
     lang_html = ""
-    for lang in data['languages']:
-        lang_html += f'<span style="display:inline-block; background:{colors["accent"]}; padding:5px 15px; border-radius:20px; margin:0 5px 10px 0;">{lang["name"]} ({lang["proficiency"]})</span>'
+    if data['languages']:
+        for lang in data['languages']:
+            lang_html += f'<span style="display:inline-block; background:{colors["accent"]}; padding:5px 15px; border-radius:20px; margin:0 5px 10px 0;">{lang["name"]} ({lang["proficiency"]})</span>'
+    else:
+        lang_html = '<span style="color: #888; font-style: italic;">Add languages</span>'
     
     # Build experience
     exp_html = ""
@@ -753,20 +646,27 @@ def generate_style2_html(template_id, data):
             <div style="margin-bottom:25px; padding-left:20px; position:relative;">
                 <div style="position:absolute; left:0; top:8px; width:12px; height:12px; background:{colors['secondary']}; border-radius:50%;"></div>
                 <div style="display:flex; justify-content:space-between; margin-bottom:5px; flex-wrap:wrap;">
-                    <span style="font-weight:bold; color:{colors['primary']};">{exp['company']}</span>
-                    <span style="color:{colors['secondary']};">{exp['start_date']}-{exp['end_date']}</span>
+                    <span style="font-weight:bold; color:{colors['primary']};">{exp['company'] if exp.get('company') else 'Company'}</span>
+                    <span style="color:{colors['secondary']};">{exp['start_date'] if exp.get('start_date') else 'Start'}-{exp['end_date'] if exp.get('end_date') else 'End'}</span>
                 </div>
-                <div style="color:#666; margin:5px 0;">{exp['position']} | {exp['location']}</div>
+                <div style="color:#666; margin:5px 0;">{exp['position'] if exp.get('position') else 'Position'} | {exp['location'] if exp.get('location') else 'Location'}</div>
                 <ul style="margin-left:20px; margin-top:5px;">
         """
-        for desc in exp['description']:
-            exp_html += f"<li style='margin-bottom:5px;'>{desc}</li>"
+        if exp.get('description'):
+            for desc in exp['description']:
+                exp_html += f"<li style='margin-bottom:5px;'>{desc}</li>"
+        else:
+            exp_html += "<li style='color: #888;'>Add description</li>"
         exp_html += "</ul></div>"
+    if not data['experience']:
+        exp_html = '<div style="color: #888; font-style: italic;">No experience added.</div>'
     
     # Build achievements
     ach_html = ""
     for achievement in data['achievements']:
         ach_html += f'<span style="display:inline-block; background:{colors["accent"]}; padding:5px 15px; border-radius:25px; margin:0 5px 10px 0;">{achievement}</span>'
+    if not data['achievements']:
+        ach_html = '<span style="color: #888; font-style: italic;">No achievements added.</span>'
     
     personal = data['personal_details']
     
@@ -774,7 +674,7 @@ def generate_style2_html(template_id, data):
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>{data['personal']['name']} - Resume</title>
+    <title>{data['personal']['name'] if data['personal']['name'] else 'Your Name'} - Resume</title>
     <style>
         * {{ margin: 0; padding: 0; box-sizing: border-box; }}
         body {{ background: {colors['primary']}; padding: 30px; font-family: Arial, sans-serif; }}
@@ -815,22 +715,22 @@ def generate_style2_html(template_id, data):
                     {photo_html}
                 </div>
                 <div>
-                    <h1 class="name">{data['personal']['name']}</h1>
-                    <div>{data['personal']['title']}</div>
+                    <h1 class="name">{data['personal']['name'] if data['personal']['name'] else 'Your Name'}</h1>
+                    <div>{data['personal']['title'] if data['personal']['title'] else 'Professional Title'}</div>
                 </div>
             </div>
             <div class="contact">
-                <span>📧 {data['personal']['email']}</span>
-                <span>📱 {data['personal']['phone']}</span>
-                <span>📍 {data['personal']['city']}</span>
+                <span>📧 {data['personal']['email'] if data['personal']['email'] else 'email@example.com'}</span>
+                <span>📱 {data['personal']['phone'] if data['personal']['phone'] else '+91 00000 00000'}</span>
+                <span>📍 {data['personal']['city'] if data['personal']['city'] else 'City'}</span>
             </div>
         </div>
         
         <div class="content">
             <div class="sidebar">
                 <div class="section-title">Key Metrics</div>
-                <div class="stat-card"><div class="stat-number">{years_exp}+</div><div>Years Experience</div></div>
-                <div class="stat-card"><div class="stat-number">{len(data['experience'])}</div><div>Roles Held</div></div>
+                <div class="stat-card"><div class="stat-number">{len(data['experience'])}</div><div>Roles</div></div>
+                <div class="stat-card"><div class="stat-number">{len(data['education'])}</div><div>Degrees</div></div>
                 
                 <div class="section-title">Skills</div>
                 <div>{skills_html}</div>
@@ -846,16 +746,16 @@ def generate_style2_html(template_id, data):
                 
                 <div class="section-title">Personal</div>
                 <div style="background:white; padding:12px; border-radius:8px;">
-                    <div><strong>Father:</strong> {personal['father_name']}</div>
-                    <div><strong>DOB:</strong> {personal['dob']}</div>
-                    <div><strong>Marital:</strong> {personal['marital_status']}</div>
-                    <div><strong>Nationality:</strong> {personal['nationality']}</div>
+                    <div><strong>Father:</strong> {personal['father_name'] if personal.get('father_name') else 'Not specified'}</div>
+                    <div><strong>DOB:</strong> {personal['dob'] if personal.get('dob') else 'Not specified'}</div>
+                    <div><strong>Marital:</strong> {personal['marital_status'] if personal.get('marital_status') else 'Not specified'}</div>
+                    <div><strong>Nationality:</strong> {personal['nationality'] if personal.get('nationality') else 'Not specified'}</div>
                 </div>
             </div>
             
             <div class="main">
                 <div class="section-title">Summary</div>
-                <p>{data['summary']}</p>
+                <p>{data['summary'] if data['summary'] else 'Add your professional summary in the editor.'}</p>
                 
                 <div class="section-title">Experience</div>
                 {exp_html}
@@ -867,8 +767,8 @@ def generate_style2_html(template_id, data):
                     <p>I hereby declare that the information is true and correct.</p>
                     <div class="signature">
                         <span>Date: _____________</span>
-                        <span>Place: {data['personal']['city']}</span>
-                        <span style="font-weight:bold;">({data['personal']['name']})</span>
+                        <span>Place: {data['personal']['city'] if data['personal']['city'] else '______'}</span>
+                        <span style="font-weight:bold;">({data['personal']['name'] if data['personal']['name'] else 'Your Name'})</span>
                     </div>
                 </div>
             </div>
@@ -883,48 +783,56 @@ def generate_style3_html(template_id, data):
     template = TEMPLATES.get(template_id)
     colors = template['colors']
     
-    years_exp = 13
-    
     # Photo handling
     photo_html = ""
     if data.get('profile_image'):
         photo_html = f'<img src="{data["profile_image"]}" style="width:80px; height:80px; border-radius:50%; object-fit:cover;" alt="Profile">'
     else:
-        photo_html = f'<div style="width:80px; height:80px; border-radius:50%; background:{colors["primary"]}; display:flex; align-items:center; justify-content:center; font-size:40px; color:white;">{data["personal"]["name"][0]}</div>'
+        photo_html = f'<div style="width:80px; height:80px; border-radius:50%; background:{colors["primary"]}; display:flex; align-items:center; justify-content:center; font-size:40px; color:white;">{data["personal"]["name"][0] if data["personal"]["name"] else "?"}</div>'
     
     # Build skills as pills
     skills_html = ""
-    for category, skills in data['skills'].items():
-        for skill in skills:
-            skills_html += f'<span style="display:inline-block; background:white; padding:5px 15px; border-radius:30px; margin:0 5px 10px 0; border:1px solid {colors["primary"]};">{skill}</span>'
+    if data['skills']:
+        for category, skills in data['skills'].items():
+            for skill in skills:
+                skills_html += f'<span style="display:inline-block; background:white; padding:5px 15px; border-radius:30px; margin:0 5px 10px 0; border:1px solid {colors["primary"]};">{skill}</span>'
+    else:
+        skills_html = '<span style="color: #888; font-style: italic;">Add skills</span>'
     
     # Build education
     edu_html = ""
     for edu in data['education']:
         edu_html += f"""
             <div style="margin-bottom:15px;">
-                <div style="font-size:18px; font-weight:bold; color:{colors['primary']};">{edu['year']}</div>
-                <div style="font-weight:bold;">{edu['degree']}</div>
-                <div style="color:#666;">{edu['institution']}</div>
+                <div style="font-size:18px; font-weight:bold; color:{colors['primary']};">{edu['year'] if edu.get('year') else 'Year'}</div>
+                <div style="font-weight:bold;">{edu['degree'] if edu.get('degree') else 'Degree'}</div>
+                <div style="color:#666;">{edu['institution'] if edu.get('institution') else 'Institution'}</div>
                 {f'<div style="color:{colors["primary"]};">{edu["grade"]}</div>' if edu.get('grade') else ''}
             </div>
         """
+    if not data['education']:
+        edu_html = '<div style="color: #888; font-style: italic;">No education added.</div>'
     
     # Build certifications
     cert_html = ""
     for cert in data['certifications']:
         cert_html += f"""
             <div style="margin-bottom:12px;">
-                <div style="color:{colors['primary']}; font-weight:bold;">{cert['year']}</div>
-                <div style="font-weight:bold;">{cert['name']}</div>
-                <div style="color:#666;">{cert['issuer']}</div>
+                <div style="color:{colors['primary']}; font-weight:bold;">{cert['year'] if cert.get('year') else 'Year'}</div>
+                <div style="font-weight:bold;">{cert['name'] if cert.get('name') else 'Certification'}</div>
+                <div style="color:#666;">{cert['issuer'] if cert.get('issuer') else 'Issuer'}</div>
             </div>
         """
+    if not data['certifications']:
+        cert_html = '<div style="color: #888; font-style: italic;">No certifications added.</div>'
     
     # Build languages
     lang_html = ""
-    for lang in data['languages']:
-        lang_html += f'<span style="display:inline-block; background:white; padding:5px 15px; border-radius:30px; margin:0 5px 10px 0; border:1px solid {colors["primary"]};"><strong>{lang["name"]}</strong> ({lang["proficiency"]})</span>'
+    if data['languages']:
+        for lang in data['languages']:
+            lang_html += f'<span style="display:inline-block; background:white; padding:5px 15px; border-radius:30px; margin:0 5px 10px 0; border:1px solid {colors["primary"]};"><strong>{lang["name"]}</strong> ({lang["proficiency"]})</span>'
+    else:
+        lang_html = '<span style="color: #888; font-style: italic;">Add languages</span>'
     
     # Build experience
     exp_html = ""
@@ -932,20 +840,27 @@ def generate_style3_html(template_id, data):
         exp_html += f"""
             <div style="background:white; padding:20px; border-radius:15px; margin-bottom:20px; border:1px solid {colors['primary']};">
                 <div style="display:flex; justify-content:space-between; margin-bottom:10px; flex-wrap:wrap;">
-                    <span style="font-size:20px; font-weight:bold; color:{colors['secondary']};">{exp['company']}</span>
-                    <span style="color:{colors['primary']};">{exp['start_date']}-{exp['end_date']}</span>
+                    <span style="font-size:20px; font-weight:bold; color:{colors['secondary']};">{exp['company'] if exp.get('company') else 'Company'}</span>
+                    <span style="color:{colors['primary']};">{exp['start_date'] if exp.get('start_date') else 'Start'}-{exp['end_date'] if exp.get('end_date') else 'End'}</span>
                 </div>
-                <div style="color:#666; margin:5px 0;">{exp['position']} | {exp['location']}</div>
+                <div style="color:#666; margin:5px 0;">{exp['position'] if exp.get('position') else 'Position'} | {exp['location'] if exp.get('location') else 'Location'}</div>
                 <ul style="margin-left:20px; margin-top:10px;">
         """
-        for desc in exp['description']:
-            exp_html += f"<li style='margin-bottom:5px;'>{desc}</li>"
+        if exp.get('description'):
+            for desc in exp['description']:
+                exp_html += f"<li style='margin-bottom:5px;'>{desc}</li>"
+        else:
+            exp_html += "<li style='color: #888;'>Add description</li>"
         exp_html += "</ul></div>"
+    if not data['experience']:
+        exp_html = '<div style="color: #888; font-style: italic;">No experience added.</div>'
     
     # Build achievements
     ach_html = ""
     for achievement in data['achievements']:
         ach_html += f"<li style='margin-bottom:5px;'>{achievement}</li>"
+    if not data['achievements']:
+        ach_html = '<li style="color: #888; font-style: italic;">No achievements added.</li>'
     
     personal = data['personal_details']
     
@@ -953,7 +868,7 @@ def generate_style3_html(template_id, data):
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>{data['personal']['name']} - Resume</title>
+    <title>{data['personal']['name'] if data['personal']['name'] else 'Your Name'} - Resume</title>
     <style>
         * {{ margin: 0; padding: 0; box-sizing: border-box; }}
         body {{ background: {colors['secondary']}; padding: 30px; font-family: Georgia, serif; }}
@@ -1019,14 +934,14 @@ def generate_style3_html(template_id, data):
             <div class="profile-container">
                 {photo_html}
             </div>
-            <h1 class="name">{data['personal']['name']}</h1>
-            <div>{data['personal']['title']}</div>
+            <h1 class="name">{data['personal']['name'] if data['personal']['name'] else 'Your Name'}</h1>
+            <div>{data['personal']['title'] if data['personal']['title'] else 'Professional Title'}</div>
         </div>
         
         <div class="contact">
-            <span>📧 {data['personal']['email']}</span>
-            <span>📱 {data['personal']['phone']}</span>
-            <span>📍 {data['personal']['city']}</span>
+            <span>📧 {data['personal']['email'] if data['personal']['email'] else 'email@example.com'}</span>
+            <span>📱 {data['personal']['phone'] if data['personal']['phone'] else '+91 00000 00000'}</span>
+            <span>📍 {data['personal']['city'] if data['personal']['city'] else 'City'}</span>
         </div>
         
         <div class="content">
@@ -1045,16 +960,16 @@ def generate_style3_html(template_id, data):
                 
                 <div class="section-title">Personal</div>
                 <div style="background:white; padding:15px; border-radius:10px;">
-                    <div><strong>Father:</strong> {personal['father_name']}</div>
-                    <div><strong>DOB:</strong> {personal['dob']}</div>
-                    <div><strong>Marital:</strong> {personal['marital_status']}</div>
-                    <div><strong>Nationality:</strong> {personal['nationality']}</div>
+                    <div><strong>Father:</strong> {personal['father_name'] if personal.get('father_name') else 'Not specified'}</div>
+                    <div><strong>DOB:</strong> {personal['dob'] if personal.get('dob') else 'Not specified'}</div>
+                    <div><strong>Marital:</strong> {personal['marital_status'] if personal.get('marital_status') else 'Not specified'}</div>
+                    <div><strong>Nationality:</strong> {personal['nationality'] if personal.get('nationality') else 'Not specified'}</div>
                 </div>
             </div>
             
             <div class="right">
                 <div style="background:white; padding:25px; border-radius:15px; margin-bottom:20px; border:1px solid {colors['primary']};">
-                    <p style="font-size:16px; line-height:1.6;">{data['summary']}</p>
+                    <p style="font-size:16px; line-height:1.6;">{data['summary'] if data['summary'] else 'Add your professional summary in the editor.'}</p>
                 </div>
                 
                 <div class="section-title">Experience</div>
@@ -1069,8 +984,8 @@ def generate_style3_html(template_id, data):
                     <p>I hereby declare that the information is true and correct.</p>
                     <div class="signature">
                         <span>Date: _____________</span>
-                        <span>Place: {data['personal']['city']}</span>
-                        <span style="font-weight:bold;">({data['personal']['name']})</span>
+                        <span>Place: {data['personal']['city'] if data['personal']['city'] else '______'}</span>
+                        <span style="font-weight:bold;">({data['personal']['name'] if data['personal']['name'] else 'Your Name'})</span>
                     </div>
                 </div>
             </div>
@@ -1130,13 +1045,13 @@ def generate_word_doc(data, template_id):
     # Header
     header = doc.add_paragraph()
     header.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    name_run = header.add_run(data['personal']['name'])
+    name_run = header.add_run(data['personal']['name'] if data['personal']['name'] else 'Your Name')
     name_run.font.size = Pt(36)
     name_run.font.bold = True
     name_run.font.color.rgb = RGBColor(*primary_rgb)
     header.add_run('\n')
     
-    title_run = header.add_run(data['personal']['title'])
+    title_run = header.add_run(data['personal']['title'] if data['personal']['title'] else 'Professional Title')
     title_run.font.size = Pt(16)
     title_run.font.italic = True
     title_run.font.color.rgb = RGBColor(*secondary_rgb)
@@ -1145,69 +1060,86 @@ def generate_word_doc(data, template_id):
     # Contact
     contact = doc.add_paragraph()
     contact.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    contact.add_run(f"📧 {data['personal']['email']}     📱 {data['personal']['phone']}     📍 {data['personal']['city']}")
+    contact.add_run(f"📧 {data['personal']['email'] if data['personal']['email'] else 'email@example.com'}     📱 {data['personal']['phone'] if data['personal']['phone'] else '+91 00000 00000'}     📍 {data['personal']['city'] if data['personal']['city'] else 'City'}")
     
     doc.add_paragraph()
     
     # Summary
     doc.add_heading('Professional Summary', level=1)
-    doc.add_paragraph(data['summary'])
+    doc.add_paragraph(data['summary'] if data['summary'] else 'Add your professional summary here.')
     doc.add_paragraph()
     
     # Experience
     doc.add_heading('Work Experience', level=1)
-    for exp in data['experience']:
-        p = doc.add_paragraph()
-        p.add_run(f"{exp['company']} - {exp['location']}").bold = True
-        p.add_run(f"\n{exp['position']}").italic = True
-        p.add_run(f"    ({exp['start_date']} - {exp['end_date']})")
-        for desc in exp['description']:
-            doc.add_paragraph(desc, style='List Bullet')
+    if data['experience']:
+        for exp in data['experience']:
+            p = doc.add_paragraph()
+            p.add_run(f"{exp['company'] if exp.get('company') else 'Company'} - {exp['location'] if exp.get('location') else 'Location'}").bold = True
+            p.add_run(f"\n{exp['position'] if exp.get('position') else 'Position'}").italic = True
+            p.add_run(f"    ({exp['start_date'] if exp.get('start_date') else 'Start'} - {exp['end_date'] if exp.get('end_date') else 'End'})")
+            if exp.get('description'):
+                for desc in exp['description']:
+                    doc.add_paragraph(desc, style='List Bullet')
+            doc.add_paragraph()
+    else:
+        doc.add_paragraph("No experience added yet. Click 'Edit All Sections' to add.")
         doc.add_paragraph()
     
     # Education
     doc.add_heading('Education', level=1)
-    for edu in data['education']:
-        p = doc.add_paragraph()
-        p.add_run(f"{edu['degree']}").bold = True
-        p.add_run(f" - {edu['institution']}, {edu['year']}")
-        if edu.get('grade'):
-            doc.add_paragraph(f"Grade: {edu['grade']}", style='List Bullet')
-    doc.add_paragraph()
+    if data['education']:
+        for edu in data['education']:
+            p = doc.add_paragraph()
+            p.add_run(f"{edu['degree'] if edu.get('degree') else 'Degree'}").bold = True
+            p.add_run(f" - {edu['institution'] if edu.get('institution') else 'Institution'}, {edu['year'] if edu.get('year') else 'Year'}")
+            if edu.get('grade'):
+                doc.add_paragraph(f"Grade: {edu['grade']}", style='List Bullet')
+        doc.add_paragraph()
+    else:
+        doc.add_paragraph("No education added yet. Click 'Edit All Sections' to add.")
+        doc.add_paragraph()
     
     # Skills
     doc.add_heading('Skills & Expertise', level=1)
-    for category, skills in data['skills'].items():
-        doc.add_paragraph(f"{category}: {', '.join(skills)}")
-    doc.add_paragraph()
+    if data['skills']:
+        for category, skills in data['skills'].items():
+            doc.add_paragraph(f"{category}: {', '.join(skills)}")
+        doc.add_paragraph()
+    else:
+        doc.add_paragraph("No skills added yet. Click 'Edit All Sections' to add.")
+        doc.add_paragraph()
     
     # Certifications
     if data['certifications']:
         doc.add_heading('Certifications', level=1)
         for cert in data['certifications']:
-            doc.add_paragraph(f"• {cert['name']} - {cert['issuer']} ({cert['year']})")
+            doc.add_paragraph(f"• {cert['name'] if cert.get('name') else 'Certification'} - {cert['issuer'] if cert.get('issuer') else 'Issuer'} ({cert['year'] if cert.get('year') else 'Year'})")
         doc.add_paragraph()
     
     # Languages
     if data['languages']:
         doc.add_heading('Languages', level=1)
         for lang in data['languages']:
-            doc.add_paragraph(f"• {lang['name']} ({lang['proficiency']})")
+            doc.add_paragraph(f"• {lang['name'] if lang.get('name') else 'Language'} ({lang['proficiency'] if lang.get('proficiency') else 'Proficiency'})")
         doc.add_paragraph()
     
     # Achievements
     doc.add_heading('Key Achievements', level=1)
-    for achievement in data['achievements']:
-        doc.add_paragraph(f"• {achievement}")
-    doc.add_paragraph()
+    if data['achievements']:
+        for achievement in data['achievements']:
+            doc.add_paragraph(f"• {achievement}")
+        doc.add_paragraph()
+    else:
+        doc.add_paragraph("No achievements added yet. Click 'Edit All Sections' to add.")
+        doc.add_paragraph()
     
     # Personal Details
     doc.add_heading('Personal Details', level=1)
     personal = data['personal_details']
-    doc.add_paragraph(f"Father's Name: {personal['father_name']}")
-    doc.add_paragraph(f"Date of Birth: {personal['dob']}")
-    doc.add_paragraph(f"Marital Status: {personal['marital_status']}")
-    doc.add_paragraph(f"Nationality: {personal['nationality']}")
+    doc.add_paragraph(f"Father's Name: {personal['father_name'] if personal.get('father_name') else 'Not specified'}")
+    doc.add_paragraph(f"Date of Birth: {personal['dob'] if personal.get('dob') else 'Not specified'}")
+    doc.add_paragraph(f"Marital Status: {personal['marital_status'] if personal.get('marital_status') else 'Not specified'}")
+    doc.add_paragraph(f"Nationality: {personal['nationality'] if personal.get('nationality') else 'Not specified'}")
     doc.add_paragraph()
     
     # Declaration
@@ -1220,7 +1152,7 @@ def generate_word_doc(data, template_id):
     # Signature
     sig = doc.add_paragraph()
     sig.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    sig.add_run(f"Date: _____________    Place: {data['personal']['city']}    ({data['personal']['name']})")
+    sig.add_run(f"Date: _____________    Place: {data['personal']['city'] if data['personal']['city'] else '______'}    ({data['personal']['name'] if data['personal']['name'] else 'Your Name'})")
     
     doc_bytes = io.BytesIO()
     doc.save(doc_bytes)
@@ -1229,7 +1161,9 @@ def generate_word_doc(data, template_id):
     return doc_bytes.getvalue()
 
 def main():
-    init_session_state()
+    # Initialize session state if not already done
+    if 'resume_data' not in st.session_state:
+        init_session_state()
     
     st.markdown("""
     <div class="main-header">
@@ -1250,7 +1184,8 @@ def main():
             if uploaded_file:
                 bytes_data = uploaded_file.getvalue()
                 encoded = base64.b64encode(bytes_data).decode()
-                st.session_state.resume_data['profile_image'] = f"data:image/{uploaded_file.type.split('/')[-1]};base64,{encoded}"
+                if st.session_state.resume_data is not None:
+                    st.session_state.resume_data['profile_image'] = f"data:image/{uploaded_file.type.split('/')[-1]};base64,{encoded}"
                 st.image(uploaded_file, width=100)
                 st.success("✅ Photo uploaded!")
         
@@ -1265,19 +1200,47 @@ def main():
         
         # Personal Information
         with st.expander("👤 Personal Info", expanded=True):
-            st.session_state.resume_data['personal']['name'] = st.text_input("Full Name", st.session_state.resume_data['personal']['name'])
-            st.session_state.resume_data['personal']['email'] = st.text_input("Email", st.session_state.resume_data['personal']['email'])
-            st.session_state.resume_data['personal']['phone'] = st.text_input("Phone", st.session_state.resume_data['personal']['phone'])
-            st.session_state.resume_data['personal']['city'] = st.text_input("City", st.session_state.resume_data['personal']['city'])
-            st.session_state.resume_data['personal']['state'] = st.text_input("State", st.session_state.resume_data['personal']['state'])
+            if st.session_state.resume_data is not None:
+                # Get current values or empty strings
+                current_name = st.session_state.resume_data.get('personal', {}).get('name', '')
+                current_email = st.session_state.resume_data.get('personal', {}).get('email', '')
+                current_phone = st.session_state.resume_data.get('personal', {}).get('phone', '')
+                current_city = st.session_state.resume_data.get('personal', {}).get('city', '')
+                current_state = st.session_state.resume_data.get('personal', {}).get('state', '')
+                current_title = st.session_state.resume_data.get('personal', {}).get('title', '')
+            else:
+                current_name = current_email = current_phone = current_city = current_state = current_title = ''
+            
+            # Create form for personal info
+            name = st.text_input("Full Name", current_name)
+            email = st.text_input("Email", current_email)
+            phone = st.text_input("Phone", current_phone)
+            title = st.text_input("Professional Title", current_title)
+            city = st.text_input("City", current_city)
+            state = st.text_input("State", current_state)
+            
+            # Update session state
+            if st.session_state.resume_data is not None:
+                st.session_state.resume_data['personal']['name'] = name
+                st.session_state.resume_data['personal']['email'] = email
+                st.session_state.resume_data['personal']['phone'] = phone
+                st.session_state.resume_data['personal']['title'] = title
+                st.session_state.resume_data['personal']['city'] = city
+                st.session_state.resume_data['personal']['state'] = state
         
         # Summary
         with st.expander("📝 Summary", expanded=True):
-            st.session_state.resume_data['summary'] = st.text_area("Professional Summary", st.session_state.resume_data['summary'], height=100)
+            if st.session_state.resume_data is not None:
+                current_summary = st.session_state.resume_data.get('summary', '')
+            else:
+                current_summary = ''
+            summary = st.text_area("Professional Summary", current_summary, height=100)
+            if st.session_state.resume_data is not None:
+                st.session_state.resume_data['summary'] = summary
         
-        if st.button("🔄 Reset", use_container_width=True):
-            st.session_state.resume_data = None
-            init_session_state()
+        # Fixed Reset Button
+        if st.button("🔄 Reset to Blank", use_container_width=True):
+            safe_reset()
             st.rerun()
     
     # Main content
@@ -1285,197 +1248,239 @@ def main():
     
     with col1:
         st.markdown("### 🎨 Templates")
-        family_templates = {tid: t for tid, t in TEMPLATES.items() if t['family'] == st.session_state.template_family}
-        
-        for i, (tid, template) in enumerate(list(family_templates.items())[:9]):
-            is_selected = st.session_state.selected_template == tid
-            card_class = "template-card selected" if is_selected else "template-card"
+        if st.session_state.resume_data is not None:
+            family_templates = {tid: t for tid, t in TEMPLATES.items() if t['family'] == st.session_state.template_family}
             
-            st.markdown(f"""
-            <div class="{card_class}">
-                <div class="template-preview" style="background: {template['colors']['primary']};">
-                    <span>📄</span>
+            for i, (tid, template) in enumerate(list(family_templates.items())[:9]):
+                is_selected = st.session_state.selected_template == tid
+                card_class = "template-card selected" if is_selected else "template-card"
+                
+                st.markdown(f"""
+                <div class="{card_class}">
+                    <div class="template-preview" style="background: {template['colors']['primary']};">
+                        <span>📄</span>
+                    </div>
+                    <h4>{template['name']}</h4>
                 </div>
-                <h4>{template['name']}</h4>
-            </div>
-            """, unsafe_allow_html=True)
-            
-            if st.button("Select", key=f"sel_{tid}"):
-                st.session_state.selected_template = tid
-                st.rerun()
+                """, unsafe_allow_html=True)
+                
+                if st.button("Select", key=f"sel_{tid}"):
+                    st.session_state.selected_template = tid
+                    st.rerun()
     
     with col2:
         st.markdown("### 👁️ Preview")
         
-        selected_tid = st.session_state.selected_template
-        template = TEMPLATES.get(selected_tid)
-        
-        if template['family'] == 'Style 1: Minimalist Luxury':
-            html = generate_style1_html(selected_tid, st.session_state.resume_data)
-        elif template['family'] == 'Style 2: Modern Corporate':
-            html = generate_style2_html(selected_tid, st.session_state.resume_data)
-        else:
-            html = generate_style3_html(selected_tid, st.session_state.resume_data)
-        
-        st.components.v1.html(html, height=700, scrolling=True)
-        
-        # Download
-        st.markdown("### 📥 Download")
-        col_a, col_b, col_c = st.columns(3)
-        
-        with col_a:
-            b64 = base64.b64encode(html.encode()).decode()
-            st.markdown(f'<a href="data:text/html;base64,{b64}" download="resume.html"><button class="download-btn">📄 HTML</button></a>', unsafe_allow_html=True)
-        
-        with col_b:
-            if st.button("📑 Generate PDF", use_container_width=True):
-                with st.spinner("Generating PDF..."):
-                    pdf_bytes = generate_pdf(html)
-                    if pdf_bytes:
-                        st.session_state.pdf_data = base64.b64encode(pdf_bytes).decode()
-                        st.success("✅ PDF Ready!")
+        if st.session_state.resume_data is not None:
+            selected_tid = st.session_state.selected_template
+            template = TEMPLATES.get(selected_tid)
             
-            if st.session_state.pdf_data:
-                st.markdown(f'<a href="data:application/pdf;base64,{st.session_state.pdf_data}" download="resume.pdf" class="download-link">📑 Download PDF</a>', unsafe_allow_html=True)
-        
-        with col_c:
-            if st.button("📝 Generate WORD", use_container_width=True):
-                with st.spinner("Generating Word..."):
-                    word_bytes = generate_word_doc(st.session_state.resume_data, selected_tid)
-                    if word_bytes:
-                        st.session_state.word_data = base64.b64encode(word_bytes).decode()
-                        st.success("✅ Word Ready!")
+            if template['family'] == 'Style 1: Minimalist Luxury':
+                html = generate_style1_html(selected_tid, st.session_state.resume_data)
+            elif template['family'] == 'Style 2: Modern Corporate':
+                html = generate_style2_html(selected_tid, st.session_state.resume_data)
+            else:
+                html = generate_style3_html(selected_tid, st.session_state.resume_data)
             
-            if st.session_state.word_data:
-                st.markdown(f'<a href="data:application/vnd.openxmlformats-officedocument.wordprocessingml.document;base64,{st.session_state.word_data}" download="resume.docx" class="download-link">📝 Download WORD</a>', unsafe_allow_html=True)
+            st.components.v1.html(html, height=700, scrolling=True)
+            
+            # Download
+            st.markdown("### 📥 Download")
+            col_a, col_b, col_c = st.columns(3)
+            
+            with col_a:
+                b64 = base64.b64encode(html.encode()).decode()
+                st.markdown(f'<a href="data:text/html;base64,{b64}" download="resume.html"><button class="download-btn">📄 HTML</button></a>', unsafe_allow_html=True)
+            
+            with col_b:
+                if st.button("📑 Generate PDF", use_container_width=True):
+                    with st.spinner("Generating PDF..."):
+                        pdf_bytes = generate_pdf(html)
+                        if pdf_bytes:
+                            st.session_state.pdf_data = base64.b64encode(pdf_bytes).decode()
+                            st.success("✅ PDF Ready!")
+                
+                if st.session_state.pdf_data:
+                    st.markdown(f'<a href="data:application/pdf;base64,{st.session_state.pdf_data}" download="resume.pdf" class="download-link">📑 Download PDF</a>', unsafe_allow_html=True)
+            
+            with col_c:
+                if st.button("📝 Generate WORD", use_container_width=True):
+                    with st.spinner("Generating Word..."):
+                        word_bytes = generate_word_doc(st.session_state.resume_data, selected_tid)
+                        if word_bytes:
+                            st.session_state.word_data = base64.b64encode(word_bytes).decode()
+                            st.success("✅ Word Ready!")
+                
+                if st.session_state.word_data:
+                    st.markdown(f'<a href="data:application/vnd.openxmlformats-officedocument.wordprocessingml.document;base64,{st.session_state.word_data}" download="resume.docx" class="download-link">📝 Download WORD</a>', unsafe_allow_html=True)
     
     # Edit Sections
     with st.expander("✏️ Edit All Sections", expanded=False):
-        tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["Education", "Experience", "Certifications", "Achievements", "Languages", "Personal"])
-        
-        with tab1:
-            if st.button("➕ Add Education"):
-                st.session_state.resume_data['education'].append({
-                    'degree': 'New Degree',
-                    'institution': 'Institution',
-                    'year': 'Year',
-                    'grade': ''
-                })
-                st.rerun()
+        if st.session_state.resume_data is not None:
+            tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["🎓 Education", "💼 Experience", "📜 Certifications", "🏆 Achievements", "🗣️ Languages", "📋 Personal Details"])
             
-            for i, edu in enumerate(st.session_state.resume_data['education']):
-                cols = st.columns([2, 2, 1, 1, 0.5])
-                with cols[0]:
-                    edu['degree'] = st.text_input("Degree", edu['degree'], key=f"edu_deg_{i}")
-                with cols[1]:
-                    edu['institution'] = st.text_input("Institution", edu['institution'], key=f"edu_inst_{i}")
-                with cols[2]:
-                    edu['year'] = st.text_input("Year", edu['year'], key=f"edu_year_{i}")
-                with cols[3]:
-                    edu['grade'] = st.text_input("Grade", edu.get('grade', ''), key=f"edu_grade_{i}")
-                with cols[4]:
-                    if st.button("🗑️", key=f"del_edu_{i}"):
-                        st.session_state.resume_data['education'].pop(i)
-                        st.rerun()
-                st.markdown("---")
-        
-        with tab2:
-            if st.button("➕ Add Experience"):
-                st.session_state.resume_data['experience'].append({
-                    'company': 'New Company',
-                    'location': 'Location',
-                    'position': 'Position',
-                    'start_date': 'Start',
-                    'end_date': 'End',
-                    'description': ['Description']
-                })
-                st.rerun()
-            
-            for i, exp in enumerate(st.session_state.resume_data['experience']):
-                cols = st.columns([2, 2, 1, 1])
-                with cols[0]:
-                    exp['company'] = st.text_input("Company", exp['company'], key=f"exp_comp_{i}")
-                with cols[1]:
-                    exp['position'] = st.text_input("Position", exp['position'], key=f"exp_pos_{i}")
-                with cols[2]:
-                    exp['start_date'] = st.text_input("Start", exp['start_date'], key=f"exp_start_{i}")
-                with cols[3]:
-                    if st.button("🗑️", key=f"del_exp_{i}"):
-                        st.session_state.resume_data['experience'].pop(i)
-                        st.rerun()
+            with tab1:
+                st.markdown("### Education")
+                if st.button("➕ Add Education", key="add_edu"):
+                    if 'education' not in st.session_state.resume_data:
+                        st.session_state.resume_data['education'] = []
+                    st.session_state.resume_data['education'].append({
+                        'degree': '',
+                        'institution': '',
+                        'year': '',
+                        'grade': ''
+                    })
+                    st.rerun()
                 
-                exp['location'] = st.text_input("Location", exp['location'], key=f"exp_loc_{i}")
-                exp['end_date'] = st.text_input("End Date", exp['end_date'], key=f"exp_end_{i}")
+                if 'education' in st.session_state.resume_data and st.session_state.resume_data['education']:
+                    for i, edu in enumerate(st.session_state.resume_data['education']):
+                        cols = st.columns([2, 2, 1, 1, 0.5])
+                        with cols[0]:
+                            edu['degree'] = st.text_input("Degree", edu['degree'], key=f"edu_deg_{i}")
+                        with cols[1]:
+                            edu['institution'] = st.text_input("Institution", edu['institution'], key=f"edu_inst_{i}")
+                        with cols[2]:
+                            edu['year'] = st.text_input("Year", edu['year'], key=f"edu_year_{i}")
+                        with cols[3]:
+                            edu['grade'] = st.text_input("Grade", edu.get('grade', ''), key=f"edu_grade_{i}")
+                        with cols[4]:
+                            if st.button("🗑️", key=f"del_edu_{i}"):
+                                st.session_state.resume_data['education'].pop(i)
+                                st.rerun()
+                        st.markdown("---")
+                else:
+                    st.info("No education entries. Click 'Add Education' to create one.")
+            
+            with tab2:
+                st.markdown("### Work Experience")
+                if st.button("➕ Add Experience", key="add_exp"):
+                    if 'experience' not in st.session_state.resume_data:
+                        st.session_state.resume_data['experience'] = []
+                    st.session_state.resume_data['experience'].append({
+                        'company': '',
+                        'location': '',
+                        'position': '',
+                        'start_date': '',
+                        'end_date': '',
+                        'description': ['']
+                    })
+                    st.rerun()
                 
-                desc_text = "\n".join(exp['description'])
-                new_desc = st.text_area("Description", desc_text, key=f"exp_desc_{i}", height=80)
-                exp['description'] = [d.strip() for d in new_desc.split('\n') if d.strip()]
-                st.markdown("---")
-        
-        with tab3:
-            if st.button("➕ Add Certification"):
-                st.session_state.resume_data['certifications'].append({
-                    'name': 'New Certification',
-                    'issuer': 'Issuer',
-                    'year': 'Year'
-                })
-                st.rerun()
+                if 'experience' in st.session_state.resume_data and st.session_state.resume_data['experience']:
+                    for i, exp in enumerate(st.session_state.resume_data['experience']):
+                        cols = st.columns([2, 2, 1, 1])
+                        with cols[0]:
+                            exp['company'] = st.text_input("Company", exp['company'], key=f"exp_comp_{i}")
+                        with cols[1]:
+                            exp['position'] = st.text_input("Position", exp['position'], key=f"exp_pos_{i}")
+                        with cols[2]:
+                            exp['start_date'] = st.text_input("Start", exp['start_date'], key=f"exp_start_{i}")
+                        with cols[3]:
+                            if st.button("🗑️", key=f"del_exp_{i}"):
+                                st.session_state.resume_data['experience'].pop(i)
+                                st.rerun()
+                        
+                        exp['location'] = st.text_input("Location", exp['location'], key=f"exp_loc_{i}")
+                        exp['end_date'] = st.text_input("End Date", exp['end_date'], key=f"exp_end_{i}")
+                        
+                        desc_text = "\n".join(exp['description']) if exp['description'] else ""
+                        new_desc = st.text_area("Description (one per line)", desc_text, key=f"exp_desc_{i}", height=80)
+                        exp['description'] = [d.strip() for d in new_desc.split('\n') if d.strip()]
+                        st.markdown("---")
+                else:
+                    st.info("No experience entries. Click 'Add Experience' to create one.")
             
-            for i, cert in enumerate(st.session_state.resume_data['certifications']):
-                cols = st.columns([2, 2, 1, 0.5])
-                with cols[0]:
-                    cert['name'] = st.text_input("Name", cert['name'], key=f"cert_name_{i}")
-                with cols[1]:
-                    cert['issuer'] = st.text_input("Issuer", cert['issuer'], key=f"cert_issuer_{i}")
-                with cols[2]:
-                    cert['year'] = st.text_input("Year", cert['year'], key=f"cert_year_{i}")
-                with cols[3]:
-                    if st.button("🗑️", key=f"del_cert_{i}"):
-                        st.session_state.resume_data['certifications'].pop(i)
-                        st.rerun()
-        
-        with tab4:
-            achievements_text = "\n".join(st.session_state.resume_data['achievements'])
-            new_achievements = st.text_area("Achievements (one per line)", achievements_text, height=150)
-            st.session_state.resume_data['achievements'] = [a.strip() for a in new_achievements.split('\n') if a.strip()]
+            with tab3:
+                st.markdown("### Certifications")
+                if st.button("➕ Add Certification", key="add_cert"):
+                    if 'certifications' not in st.session_state.resume_data:
+                        st.session_state.resume_data['certifications'] = []
+                    st.session_state.resume_data['certifications'].append({
+                        'name': '',
+                        'issuer': '',
+                        'year': ''
+                    })
+                    st.rerun()
+                
+                if 'certifications' in st.session_state.resume_data and st.session_state.resume_data['certifications']:
+                    for i, cert in enumerate(st.session_state.resume_data['certifications']):
+                        cols = st.columns([2, 2, 1, 0.5])
+                        with cols[0]:
+                            cert['name'] = st.text_input("Name", cert['name'], key=f"cert_name_{i}")
+                        with cols[1]:
+                            cert['issuer'] = st.text_input("Issuer", cert['issuer'], key=f"cert_issuer_{i}")
+                        with cols[2]:
+                            cert['year'] = st.text_input("Year", cert['year'], key=f"cert_year_{i}")
+                        with cols[3]:
+                            if st.button("🗑️", key=f"del_cert_{i}"):
+                                st.session_state.resume_data['certifications'].pop(i)
+                                st.rerun()
+                else:
+                    st.info("No certifications. Click 'Add Certification' to create one.")
             
-            if st.button("➕ Add Achievement"):
-                st.session_state.resume_data['achievements'].append('New achievement')
-                st.rerun()
-        
-        with tab5:
-            if st.button("➕ Add Language"):
-                st.session_state.resume_data['languages'].append({
-                    'name': 'New Language',
-                    'proficiency': 'Fluent'
-                })
-                st.rerun()
+            with tab4:
+                st.markdown("### Key Achievements")
+                if 'achievements' not in st.session_state.resume_data:
+                    st.session_state.resume_data['achievements'] = []
+                
+                achievements_text = "\n".join(st.session_state.resume_data['achievements'])
+                new_achievements = st.text_area("Achievements (one per line)", achievements_text, height=150)
+                st.session_state.resume_data['achievements'] = [a.strip() for a in new_achievements.split('\n') if a.strip()]
+                
+                if st.button("➕ Add Achievement", key="add_ach"):
+                    st.session_state.resume_data['achievements'].append('')
+                    st.rerun()
             
-            for i, lang in enumerate(st.session_state.resume_data['languages']):
-                cols = st.columns([2, 2, 0.5])
-                with cols[0]:
-                    lang['name'] = st.text_input("Language", lang['name'], key=f"lang_name_{i}")
-                with cols[1]:
-                    lang['proficiency'] = st.selectbox("Proficiency", 
-                        ['Native', 'Fluent', 'Professional', 'Intermediate', 'Basic'],
-                        index=['Native', 'Fluent', 'Professional', 'Intermediate', 'Basic'].index(lang['proficiency']) 
-                        if lang['proficiency'] in ['Native', 'Fluent', 'Professional', 'Intermediate', 'Basic'] else 1,
-                        key=f"lang_prof_{i}")
-                with cols[2]:
-                    if st.button("🗑️", key=f"del_lang_{i}"):
-                        st.session_state.resume_data['languages'].pop(i)
-                        st.rerun()
-        
-        with tab6:
-            col1, col2 = st.columns(2)
-            with col1:
-                st.session_state.resume_data['personal_details']['father_name'] = st.text_input("Father's Name", st.session_state.resume_data['personal_details']['father_name'])
-                st.session_state.resume_data['personal_details']['dob'] = st.text_input("Date of Birth", st.session_state.resume_data['personal_details']['dob'])
-            with col2:
-                st.session_state.resume_data['personal_details']['marital_status'] = st.selectbox("Marital Status", 
-                    ['Married', 'Unmarried', 'Divorced', 'Widowed'],
-                    index=0 if st.session_state.resume_data['personal_details']['marital_status'] == 'Married' else 1)
-                st.session_state.resume_data['personal_details']['nationality'] = st.text_input("Nationality", st.session_state.resume_data['personal_details']['nationality'])
+            with tab5:
+                st.markdown("### Languages")
+                if st.button("➕ Add Language", key="add_lang"):
+                    if 'languages' not in st.session_state.resume_data:
+                        st.session_state.resume_data['languages'] = []
+                    st.session_state.resume_data['languages'].append({
+                        'name': '',
+                        'proficiency': 'Fluent'
+                    })
+                    st.rerun()
+                
+                if 'languages' in st.session_state.resume_data and st.session_state.resume_data['languages']:
+                    for i, lang in enumerate(st.session_state.resume_data['languages']):
+                        cols = st.columns([2, 2, 0.5])
+                        with cols[0]:
+                            lang['name'] = st.text_input("Language", lang['name'], key=f"lang_name_{i}")
+                        with cols[1]:
+                            lang['proficiency'] = st.selectbox("Proficiency", 
+                                ['Native', 'Fluent', 'Professional', 'Intermediate', 'Basic'],
+                                index=['Native', 'Fluent', 'Professional', 'Intermediate', 'Basic'].index(lang['proficiency']) 
+                                if lang['proficiency'] in ['Native', 'Fluent', 'Professional', 'Intermediate', 'Basic'] else 1,
+                                key=f"lang_prof_{i}")
+                        with cols[2]:
+                            if st.button("🗑️", key=f"del_lang_{i}"):
+                                st.session_state.resume_data['languages'].pop(i)
+                                st.rerun()
+                else:
+                    st.info("No languages. Click 'Add Language' to create one.")
+            
+            with tab6:
+                st.markdown("### Personal Details")
+                if 'personal_details' not in st.session_state.resume_data:
+                    st.session_state.resume_data['personal_details'] = {}
+                
+                col1, col2 = st.columns(2)
+                with col1:
+                    father_name = st.text_input("Father's Name", st.session_state.resume_data['personal_details'].get('father_name', ''))
+                    dob = st.text_input("Date of Birth", st.session_state.resume_data['personal_details'].get('dob', ''))
+                with col2:
+                    marital_status = st.selectbox("Marital Status", 
+                        ['', 'Married', 'Unmarried', 'Divorced', 'Widowed'],
+                        index=0 if not st.session_state.resume_data['personal_details'].get('marital_status') else 
+                        ['', 'Married', 'Unmarried', 'Divorced', 'Widowed'].index(st.session_state.resume_data['personal_details']['marital_status']))
+                    nationality = st.text_input("Nationality", st.session_state.resume_data['personal_details'].get('nationality', ''))
+                
+                # Update session state
+                st.session_state.resume_data['personal_details']['father_name'] = father_name
+                st.session_state.resume_data['personal_details']['dob'] = dob
+                st.session_state.resume_data['personal_details']['marital_status'] = marital_status
+                st.session_state.resume_data['personal_details']['nationality'] = nationality
     
     st.markdown("""
     <div class="footer">
