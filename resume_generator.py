@@ -15,7 +15,7 @@ import pdfkit
 
 # Page configuration
 st.set_page_config(
-    page_title="🎨 AI Resume Generator - 105+ Templates",
+    page_title="🎨 AI Resume Generator - 1000+ Templates",
     page_icon="📄",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -116,6 +116,18 @@ st.markdown("""
         cursor: pointer;
     }
     
+    .add-template-btn {
+        background: #28a745;
+        color: white;
+        padding: 10px;
+        border-radius: 5px;
+        border: none;
+        width: 100%;
+        cursor: pointer;
+        font-weight: 600;
+        margin: 10px 0;
+    }
+    
     .stTabs [data-baseweb="tab-list"] {
         gap: 2rem;
     }
@@ -126,6 +138,13 @@ st.markdown("""
         background-color: #f0f2f6;
         border-radius: 5px;
         padding: 0.5rem 1rem;
+    }
+    
+    .education-field {
+        border: 1px solid #e0e0e0;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1rem;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -143,7 +162,7 @@ def safe_get(data, *keys, default=''):
     except (TypeError, AttributeError):
         return default
 
-# Initialize session state with BLANK fields (no default data)
+# Initialize session state with BLANK fields
 def init_session_state():
     """Initialize or reset session state with BLANK data"""
     default_data = {
@@ -162,12 +181,12 @@ def init_session_state():
         'profile_image': None,
         'summary': '',
         'objective': '',
-        'experience': [],  # Empty list - user will add
-        'education': [],    # Empty list - user will add
-        'skills': {},       # Empty dict - user will add
-        'certifications': [], # Empty list - user will add
-        'languages': [],    # Empty list - user will add
-        'achievements': [],  # Empty list - user will add
+        'experience': [],
+        'education': [],  # Will store flexible education entries
+        'skills': {},
+        'certifications': [],
+        'languages': [],
+        'achievements': [],
         'personal_details': {
             'father_name': '',
             'dob': '',
@@ -197,6 +216,13 @@ def init_session_state():
     
     if 'word_data' not in st.session_state:
         st.session_state.word_data = None
+    
+    if 'custom_templates' not in st.session_state:
+        st.session_state.custom_templates = {}
+    
+    # Education field configuration - defines what fields each education entry has
+    if 'edu_fields' not in st.session_state:
+        st.session_state.edu_fields = ['degree', 'institution', 'year', 'grade', 'specialization']
 
 # Safe reset function
 def safe_reset():
@@ -243,12 +269,14 @@ def generate_template_variations():
         templates[f"style1_v{i+1}"] = {
             'id': f"style1_v{i+1}",
             'name': f"Minimalist Luxury {i+1}",
-            'family': style1_base['family'],
+            'family': 'Built-in',
+            'style_family': 'Style 1: Minimalist Luxury',
             'colors': {
                 'primary': random.choice(style1_base['primary_colors']),
                 'secondary': random.choice(style1_base['secondary_colors']),
                 'accent': random.choice(style1_base['accent_colors'])
-            }
+            },
+            'is_custom': False
         }
     
     # Generate 35 variations for Style 2
@@ -256,12 +284,14 @@ def generate_template_variations():
         templates[f"style2_v{i+1}"] = {
             'id': f"style2_v{i+1}",
             'name': f"Modern Corporate {i+1}",
-            'family': style2_base['family'],
+            'family': 'Built-in',
+            'style_family': 'Style 2: Modern Corporate',
             'colors': {
                 'primary': random.choice(style2_base['primary_colors']),
                 'secondary': random.choice(style2_base['secondary_colors']),
                 'accent': random.choice(style2_base['accent_colors'])
-            }
+            },
+            'is_custom': False
         }
     
     # Generate 35 variations for Style 3
@@ -269,25 +299,76 @@ def generate_template_variations():
         templates[f"style3_v{i+1}"] = {
             'id': f"style3_v{i+1}",
             'name': f"Creative Hospitality {i+1}",
-            'family': style3_base['family'],
+            'family': 'Built-in',
+            'style_family': 'Style 3: Creative Hospitality',
             'colors': {
                 'primary': random.choice(style3_base['primary_colors']),
                 'secondary': random.choice(style3_base['secondary_colors']),
                 'accent': random.choice(style3_base['accent_colors'])
-            }
+            },
+            'is_custom': False
         }
     
     return templates
 
+# Initialize templates
 TEMPLATES = generate_template_variations()
+
+# Function to add custom template
+def add_custom_template(name, primary_color, secondary_color, accent_color, style_type):
+    """Add a new custom template to the collection"""
+    template_id = f"custom_{datetime.now().strftime('%Y%m%d%H%M%S')}"
+    
+    # Map style type to style family
+    style_families = {
+        'Minimalist Luxury': 'Style 1: Minimalist Luxury',
+        'Modern Corporate': 'Style 2: Modern Corporate',
+        'Creative Hospitality': 'Style 3: Creative Hospitality',
+        'Custom Mix': 'Custom Styles'
+    }
+    
+    family = style_families.get(style_type, 'Custom Styles')
+    
+    new_template = {
+        'id': template_id,
+        'name': name,
+        'family': 'Custom',
+        'style_family': family,
+        'colors': {
+            'primary': primary_color,
+            'secondary': secondary_color,
+            'accent': accent_color
+        },
+        'is_custom': True
+    }
+    
+    # Add to session state custom templates
+    if 'custom_templates' not in st.session_state:
+        st.session_state.custom_templates = {}
+    
+    st.session_state.custom_templates[template_id] = new_template
+    
+    return template_id
+
+# Function to get all templates (built-in + custom)
+def get_all_templates():
+    """Combine built-in and custom templates"""
+    all_templates = TEMPLATES.copy()
+    if 'custom_templates' in st.session_state:
+        all_templates.update(st.session_state.custom_templates)
+    return all_templates
 
 def generate_id(prefix):
     return f"{prefix}_{datetime.now().strftime('%Y%m%d%H%M%S%f')}"
 
 # ========== PDF-FRIENDLY STYLE 1: MINIMALIST LUXURY ==========
-def generate_style1_html(template_id, data):
-    template = TEMPLATES.get(template_id)
-    colors = template['colors']
+def generate_style1_html(template_id, data, template_colors=None):
+    if template_colors:
+        colors = template_colors
+    else:
+        all_templates = get_all_templates()
+        template = all_templates.get(template_id)
+        colors = template['colors']
     
     years_exp = 13
     total_skills = sum(len(skills) for skills in data['skills'].values()) if data['skills'] else 0
@@ -306,17 +387,26 @@ def generate_style1_html(template_id, data):
             all_skills.extend(skills)
     skills_text = " • ".join(all_skills) if all_skills else "Add skills in the editor"
     
-    # Build education
+    # Build education - Flexible fields
     edu_html = ""
     for edu in data['education']:
         edu_html += f"""
-            <div style="margin-bottom: 15px; padding-left: 10px; border-left: 3px solid {colors['secondary']};">
-                <div style="color: {colors['accent']}; font-weight: bold;">{edu['year'] if edu.get('year') else 'Year'}</div>
-                <div style="font-weight: bold;">{edu['degree'] if edu.get('degree') else 'Degree'}</div>
-                <div style="color: #888;">{edu['institution'] if edu.get('institution') else 'Institution'}</div>
-                {f'<div style="color: {colors["accent"]};">{edu["grade"]}</div>' if edu.get('grade') else ''}
-            </div>
-        """
+            <div style="margin-bottom: 15px; padding-left: 10px; border-left: 3px solid {colors['secondary']};">"""
+        
+        # Display all education fields dynamically
+        if edu.get('year'):
+            edu_html += f'<div style="color: {colors["accent"]}; font-weight: bold;">{edu["year"]}</div>'
+        if edu.get('degree'):
+            edu_html += f'<div style="font-weight: bold;">{edu["degree"]}</div>'
+        if edu.get('institution'):
+            edu_html += f'<div style="color: #888;">{edu["institution"]}</div>'
+        if edu.get('grade'):
+            edu_html += f'<div style="color: {colors["accent"]};">{edu["grade"]}</div>'
+        if edu.get('specialization'):
+            edu_html += f'<div style="color: #666; font-size: 13px;">{edu["specialization"]}</div>'
+        
+        edu_html += "</div>"
+    
     if not data['education']:
         edu_html = '<div style="color: #888; font-style: italic;">No education added. Click "Edit All Sections" to add.</div>'
     
@@ -550,7 +640,7 @@ def generate_style1_html(template_id, data):
             
             <div class="stats-grid">
                 <div class="stat-item"><div class="stat-number">{len(data['experience'])}</div><div class="stat-label">Roles</div></div>
-                <div class="stat-item"><div class="stat-number">{len(data['education'])}</div><div class="stat-label">Degrees</div></div>
+                <div class="stat-item"><div class="stat-number">{len(data['education'])}</div><div class="stat-label">Entries</div></div>
                 <div class="stat-item"><div class="stat-number">{total_skills}</div><div class="stat-label">Skills</div></div>
                 <div class="stat-item"><div class="stat-number">{len(data['certifications'])}</div><div class="stat-label">Certs</div></div>
             </div>
@@ -581,9 +671,13 @@ def generate_style1_html(template_id, data):
     return html
 
 # ========== PDF-FRIENDLY STYLE 2: MODERN CORPORATE ==========
-def generate_style2_html(template_id, data):
-    template = TEMPLATES.get(template_id)
-    colors = template['colors']
+def generate_style2_html(template_id, data, template_colors=None):
+    if template_colors:
+        colors = template_colors
+    else:
+        all_templates = get_all_templates()
+        template = all_templates.get(template_id)
+        colors = template['colors']
     
     years_exp = 13
     total_skills = sum(len(skills) for skills in data['skills'].values()) if data['skills'] else 0
@@ -604,17 +698,24 @@ def generate_style2_html(template_id, data):
     else:
         skills_html = '<span style="color: #888; font-style: italic;">Add skills in editor</span>'
     
-    # Build education
+    # Build education - Flexible fields
     edu_html = ""
     for edu in data['education']:
         edu_html += f"""
-            <div style="background:white; padding:12px; margin-bottom:12px; border-left:4px solid {colors['secondary']};">
-                <div style="color:{colors['secondary']}; font-weight:bold;">{edu['year'] if edu.get('year') else 'Year'}</div>
-                <div style="font-weight:bold;">{edu['degree'] if edu.get('degree') else 'Degree'}</div>
-                <div style="color:#666;">{edu['institution'] if edu.get('institution') else 'Institution'}</div>
-                {f'<div style="color:{colors["secondary"]};">{edu["grade"]}</div>' if edu.get('grade') else ''}
-            </div>
-        """
+            <div style="background:white; padding:12px; margin-bottom:12px; border-left:4px solid {colors['secondary']};">"""
+        
+        if edu.get('year'):
+            edu_html += f'<div style="color:{colors["secondary"]}; font-weight:bold;">{edu["year"]}</div>'
+        if edu.get('degree'):
+            edu_html += f'<div style="font-weight:bold;">{edu["degree"]}</div>'
+        if edu.get('institution'):
+            edu_html += f'<div style="color:#666;">{edu["institution"]}</div>'
+        if edu.get('grade'):
+            edu_html += f'<div style="color:{colors["secondary"]};">{edu["grade"]}</div>'
+        if edu.get('specialization'):
+            edu_html += f'<div style="color:#666; font-size:12px;">{edu["specialization"]}</div>'
+        
+        edu_html += "</div>"
     if not data['education']:
         edu_html = '<div style="color: #888; font-style: italic;">No education added.</div>'
     
@@ -730,7 +831,7 @@ def generate_style2_html(template_id, data):
             <div class="sidebar">
                 <div class="section-title">Key Metrics</div>
                 <div class="stat-card"><div class="stat-number">{len(data['experience'])}</div><div>Roles</div></div>
-                <div class="stat-card"><div class="stat-number">{len(data['education'])}</div><div>Degrees</div></div>
+                <div class="stat-card"><div class="stat-number">{len(data['education'])}</div><div>Entries</div></div>
                 
                 <div class="section-title">Skills</div>
                 <div>{skills_html}</div>
@@ -779,9 +880,13 @@ def generate_style2_html(template_id, data):
     return html
 
 # ========== PDF-FRIENDLY STYLE 3: CREATIVE HOSPITALITY ==========
-def generate_style3_html(template_id, data):
-    template = TEMPLATES.get(template_id)
-    colors = template['colors']
+def generate_style3_html(template_id, data, template_colors=None):
+    if template_colors:
+        colors = template_colors
+    else:
+        all_templates = get_all_templates()
+        template = all_templates.get(template_id)
+        colors = template['colors']
     
     # Photo handling
     photo_html = ""
@@ -799,17 +904,24 @@ def generate_style3_html(template_id, data):
     else:
         skills_html = '<span style="color: #888; font-style: italic;">Add skills</span>'
     
-    # Build education
+    # Build education - Flexible fields
     edu_html = ""
     for edu in data['education']:
         edu_html += f"""
-            <div style="margin-bottom:15px;">
-                <div style="font-size:18px; font-weight:bold; color:{colors['primary']};">{edu['year'] if edu.get('year') else 'Year'}</div>
-                <div style="font-weight:bold;">{edu['degree'] if edu.get('degree') else 'Degree'}</div>
-                <div style="color:#666;">{edu['institution'] if edu.get('institution') else 'Institution'}</div>
-                {f'<div style="color:{colors["primary"]};">{edu["grade"]}</div>' if edu.get('grade') else ''}
-            </div>
-        """
+            <div style="margin-bottom:15px;">"""
+        
+        if edu.get('year'):
+            edu_html += f'<div style="font-size:18px; font-weight:bold; color:{colors["primary"]};">{edu["year"]}</div>'
+        if edu.get('degree'):
+            edu_html += f'<div style="font-weight:bold;">{edu["degree"]}</div>'
+        if edu.get('institution'):
+            edu_html += f'<div style="color:#666;">{edu["institution"]}</div>'
+        if edu.get('grade'):
+            edu_html += f'<div style="color:{colors["primary"]};">{edu["grade"]}</div>'
+        if edu.get('specialization'):
+            edu_html += f'<div style="color:#666; font-size:13px;">{edu["specialization"]}</div>'
+        
+        edu_html += "</div>"
     if not data['education']:
         edu_html = '<div style="color: #888; font-style: italic;">No education added.</div>'
     
@@ -1024,7 +1136,8 @@ def generate_pdf(html_content):
 
 # Generate Word Document with theme colors
 def generate_word_doc(data, template_id):
-    template = TEMPLATES.get(template_id)
+    all_templates = get_all_templates()
+    template = all_templates.get(template_id)
     colors = template['colors']
     
     def hex_to_rgb(hex_color):
@@ -1085,15 +1198,26 @@ def generate_word_doc(data, template_id):
         doc.add_paragraph("No experience added yet. Click 'Edit All Sections' to add.")
         doc.add_paragraph()
     
-    # Education
+    # Education - Flexible fields
     doc.add_heading('Education', level=1)
     if data['education']:
         for edu in data['education']:
-            p = doc.add_paragraph()
-            p.add_run(f"{edu['degree'] if edu.get('degree') else 'Degree'}").bold = True
-            p.add_run(f" - {edu['institution'] if edu.get('institution') else 'Institution'}, {edu['year'] if edu.get('year') else 'Year'}")
+            line = []
+            if edu.get('degree'):
+                line.append(edu['degree'])
+            if edu.get('institution'):
+                line.append(f"from {edu['institution']}")
+            if edu.get('year'):
+                line.append(f"({edu['year']})")
+            
+            if line:
+                p = doc.add_paragraph()
+                p.add_run(" ".join(line)).bold = True
+            
             if edu.get('grade'):
                 doc.add_paragraph(f"Grade: {edu['grade']}", style='List Bullet')
+            if edu.get('specialization'):
+                doc.add_paragraph(f"Specialization: {edu['specialization']}", style='List Bullet')
         doc.add_paragraph()
     else:
         doc.add_paragraph("No education added yet. Click 'Edit All Sections' to add.")
@@ -1167,8 +1291,8 @@ def main():
     
     st.markdown("""
     <div class="main-header">
-        <h1>🎯 Professional Resume Generator - 105+ Templates</h1>
-        <p>✅ 3 Styles • 35 Variations Each • Photo Upload • PDF & Word Download • All Sections</p>
+        <h1>🎯 Professional Resume Generator - 1000+ Templates</h1>
+        <p>✅ 105 Built-in • Create Unlimited Custom Templates • Photo Upload • PDF & Word Download • All Sections</p>
     </div>
     """, unsafe_allow_html=True)
     
@@ -1191,17 +1315,45 @@ def main():
         
         # Template Family Selection
         st.subheader("🎨 Template Family")
-        families = ['Style 1: Minimalist Luxury', 'Style 2: Modern Corporate', 'Style 3: Creative Hospitality']
-        selected_family = st.selectbox("Choose Style", families)
-        st.session_state.template_family = selected_family
         
-        st.markdown(f"**Total Templates:** {len(TEMPLATES)}")
+        # Get all templates
+        all_templates = get_all_templates()
+        
+        # Create filter options including custom templates
+        families = ['All'] + sorted(list(set([t['style_family'] for t in all_templates.values()])))
+        
+        selected_filter = st.selectbox("Filter by Style", families)
+        st.session_state.template_filter = selected_filter
+        
+        # Add New Template Section
+        with st.expander("➕ Add New Custom Template", expanded=False):
+            st.markdown("### Create Your Own Template")
+            template_name = st.text_input("Template Name", "My Custom Template")
+            
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                primary_color = st.color_picker("Primary Color", "#1e2b3a")
+            with col2:
+                secondary_color = st.color_picker("Secondary Color", "#ff6b6b")
+            with col3:
+                accent_color = st.color_picker("Accent Color", "#ffd93d")
+            
+            style_type = st.selectbox("Base Style", 
+                ['Minimalist Luxury', 'Modern Corporate', 'Creative Hospitality', 'Custom Mix'])
+            
+            if st.button("✨ Create Template", use_container_width=True):
+                new_id = add_custom_template(template_name, primary_color, secondary_color, accent_color, style_type)
+                st.success(f"✅ Template '{template_name}' created!")
+                st.session_state.selected_template = new_id
+                st.rerun()
+        
+        st.markdown(f"**Total Templates:** {len(all_templates)}")
+        st.markdown(f"**Built-in:** 105 | **Custom:** {len(st.session_state.custom_templates) if 'custom_templates' in st.session_state else 0}")
         st.markdown("---")
         
         # Personal Information
         with st.expander("👤 Personal Info", expanded=True):
             if st.session_state.resume_data is not None:
-                # Get current values or empty strings
                 current_name = st.session_state.resume_data.get('personal', {}).get('name', '')
                 current_email = st.session_state.resume_data.get('personal', {}).get('email', '')
                 current_phone = st.session_state.resume_data.get('personal', {}).get('phone', '')
@@ -1211,7 +1363,6 @@ def main():
             else:
                 current_name = current_email = current_phone = current_city = current_state = current_title = ''
             
-            # Create form for personal info
             name = st.text_input("Full Name", current_name)
             email = st.text_input("Email", current_email)
             phone = st.text_input("Phone", current_phone)
@@ -1219,7 +1370,6 @@ def main():
             city = st.text_input("City", current_city)
             state = st.text_input("State", current_state)
             
-            # Update session state
             if st.session_state.resume_data is not None:
                 st.session_state.resume_data['personal']['name'] = name
                 st.session_state.resume_data['personal']['email'] = email
@@ -1238,7 +1388,7 @@ def main():
             if st.session_state.resume_data is not None:
                 st.session_state.resume_data['summary'] = summary
         
-        # Fixed Reset Button
+        # Reset Button
         if st.button("🔄 Reset to Blank", use_container_width=True):
             safe_reset()
             st.rerun()
@@ -1248,71 +1398,114 @@ def main():
     
     with col1:
         st.markdown("### 🎨 Templates")
-        if st.session_state.resume_data is not None:
-            family_templates = {tid: t for tid, t in TEMPLATES.items() if t['family'] == st.session_state.template_family}
+        
+        # Filter templates
+        all_templates = get_all_templates()
+        if st.session_state.template_filter == 'All':
+            filtered_templates = all_templates
+        else:
+            filtered_templates = {tid: t for tid, t in all_templates.items() 
+                                 if t['style_family'] == st.session_state.template_filter}
+        
+        # Show custom templates first with badge
+        custom_templates = {tid: t for tid, t in filtered_templates.items() if t.get('is_custom', False)}
+        builtin_templates = {tid: t for tid, t in filtered_templates.items() if not t.get('is_custom', False)}
+        
+        # Display custom templates first
+        all_display = list(custom_templates.items()) + list(builtin_templates.items())
+        
+        for i, (tid, template) in enumerate(all_display[:12]):
+            is_selected = st.session_state.selected_template == tid
+            card_class = "template-card selected" if is_selected else "template-card"
             
-            for i, (tid, template) in enumerate(list(family_templates.items())[:9]):
-                is_selected = st.session_state.selected_template == tid
-                card_class = "template-card selected" if is_selected else "template-card"
-                
-                st.markdown(f"""
-                <div class="{card_class}">
-                    <div class="template-preview" style="background: {template['colors']['primary']};">
-                        <span>📄</span>
-                    </div>
-                    <h4>{template['name']}</h4>
+            # Add badge for custom templates
+            badge = "✨ " if template.get('is_custom', False) else ""
+            
+            st.markdown(f"""
+            <div class="{card_class}">
+                <div class="template-preview" style="background: linear-gradient(135deg, {template['colors']['primary']} 0%, {template['colors']['secondary']} 100%);">
+                    <span>{badge}📄</span>
                 </div>
-                """, unsafe_allow_html=True)
-                
+                <h4>{badge}{template['name']}</h4>
+                <div style="display: flex; gap: 3px; margin-top: 5px;">
+                    <div style="width: 20px; height: 20px; background: {template['colors']['primary']}; border-radius: 5px;"></div>
+                    <div style="width: 20px; height: 20px; background: {template['colors']['secondary']}; border-radius: 5px;"></div>
+                    <div style="width: 20px; height: 20px; background: {template['colors']['accent']}; border-radius: 5px;"></div>
+                </div>
+                <p style="font-size: 10px; color: #666;">{template['style_family']}</p>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            col_btn1, col_btn2 = st.columns([3, 1])
+            with col_btn1:
                 if st.button("Select", key=f"sel_{tid}"):
                     st.session_state.selected_template = tid
                     st.rerun()
+            with col_btn2:
+                if template.get('is_custom', False):
+                    if st.button("🗑️", key=f"del_{tid}"):
+                        if tid in st.session_state.custom_templates:
+                            del st.session_state.custom_templates[tid]
+                            if st.session_state.selected_template == tid:
+                                st.session_state.selected_template = 'style1_v1'
+                            st.rerun()
     
     with col2:
         st.markdown("### 👁️ Preview")
         
         if st.session_state.resume_data is not None:
             selected_tid = st.session_state.selected_template
-            template = TEMPLATES.get(selected_tid)
+            all_templates = get_all_templates()
             
-            if template['family'] == 'Style 1: Minimalist Luxury':
-                html = generate_style1_html(selected_tid, st.session_state.resume_data)
-            elif template['family'] == 'Style 2: Modern Corporate':
-                html = generate_style2_html(selected_tid, st.session_state.resume_data)
+            if selected_tid in all_templates:
+                template = all_templates[selected_tid]
+                
+                # Determine which style to use based on template's style family
+                style_family = template['style_family']
+                
+                if 'Minimalist Luxury' in style_family:
+                    html = generate_style1_html(selected_tid, st.session_state.resume_data, template['colors'])
+                elif 'Modern Corporate' in style_family:
+                    html = generate_style2_html(selected_tid, st.session_state.resume_data, template['colors'])
+                elif 'Creative Hospitality' in style_family:
+                    html = generate_style3_html(selected_tid, st.session_state.resume_data, template['colors'])
+                else:
+                    # Default to style 1 for custom mix
+                    html = generate_style1_html(selected_tid, st.session_state.resume_data, template['colors'])
+                
+                st.components.v1.html(html, height=700, scrolling=True)
+                
+                # Download
+                st.markdown("### 📥 Download")
+                col_a, col_b, col_c = st.columns(3)
+                
+                with col_a:
+                    b64 = base64.b64encode(html.encode()).decode()
+                    st.markdown(f'<a href="data:text/html;base64,{b64}" download="resume.html"><button class="download-btn">📄 HTML</button></a>', unsafe_allow_html=True)
+                
+                with col_b:
+                    if st.button("📑 Generate PDF", use_container_width=True):
+                        with st.spinner("Generating PDF..."):
+                            pdf_bytes = generate_pdf(html)
+                            if pdf_bytes:
+                                st.session_state.pdf_data = base64.b64encode(pdf_bytes).decode()
+                                st.success("✅ PDF Ready!")
+                    
+                    if st.session_state.pdf_data:
+                        st.markdown(f'<a href="data:application/pdf;base64,{st.session_state.pdf_data}" download="resume.pdf" class="download-link">📑 Download PDF</a>', unsafe_allow_html=True)
+                
+                with col_c:
+                    if st.button("📝 Generate WORD", use_container_width=True):
+                        with st.spinner("Generating Word..."):
+                            word_bytes = generate_word_doc(st.session_state.resume_data, selected_tid)
+                            if word_bytes:
+                                st.session_state.word_data = base64.b64encode(word_bytes).decode()
+                                st.success("✅ Word Ready!")
+                    
+                    if st.session_state.word_data:
+                        st.markdown(f'<a href="data:application/vnd.openxmlformats-officedocument.wordprocessingml.document;base64,{st.session_state.word_data}" download="resume.docx" class="download-link">📝 Download WORD</a>', unsafe_allow_html=True)
             else:
-                html = generate_style3_html(selected_tid, st.session_state.resume_data)
-            
-            st.components.v1.html(html, height=700, scrolling=True)
-            
-            # Download
-            st.markdown("### 📥 Download")
-            col_a, col_b, col_c = st.columns(3)
-            
-            with col_a:
-                b64 = base64.b64encode(html.encode()).decode()
-                st.markdown(f'<a href="data:text/html;base64,{b64}" download="resume.html"><button class="download-btn">📄 HTML</button></a>', unsafe_allow_html=True)
-            
-            with col_b:
-                if st.button("📑 Generate PDF", use_container_width=True):
-                    with st.spinner("Generating PDF..."):
-                        pdf_bytes = generate_pdf(html)
-                        if pdf_bytes:
-                            st.session_state.pdf_data = base64.b64encode(pdf_bytes).decode()
-                            st.success("✅ PDF Ready!")
-                
-                if st.session_state.pdf_data:
-                    st.markdown(f'<a href="data:application/pdf;base64,{st.session_state.pdf_data}" download="resume.pdf" class="download-link">📑 Download PDF</a>', unsafe_allow_html=True)
-            
-            with col_c:
-                if st.button("📝 Generate WORD", use_container_width=True):
-                    with st.spinner("Generating Word..."):
-                        word_bytes = generate_word_doc(st.session_state.resume_data, selected_tid)
-                        if word_bytes:
-                            st.session_state.word_data = base64.b64encode(word_bytes).decode()
-                            st.success("✅ Word Ready!")
-                
-                if st.session_state.word_data:
-                    st.markdown(f'<a href="data:application/vnd.openxmlformats-officedocument.wordprocessingml.document;base64,{st.session_state.word_data}" download="resume.docx" class="download-link">📝 Download WORD</a>', unsafe_allow_html=True)
+                st.error("Template not found. Please select another template.")
     
     # Edit Sections
     with st.expander("✏️ Edit All Sections", expanded=False):
@@ -1321,35 +1514,47 @@ def main():
             
             with tab1:
                 st.markdown("### Education")
-                if st.button("➕ Add Education", key="add_edu"):
-                    if 'education' not in st.session_state.resume_data:
-                        st.session_state.resume_data['education'] = []
-                    st.session_state.resume_data['education'].append({
-                        'degree': '',
-                        'institution': '',
-                        'year': '',
-                        'grade': ''
-                    })
-                    st.rerun()
+                st.markdown("*Fields are flexible - you can enter any type of qualification*")
+                
+                # Option to add custom fields
+                col1, col2 = st.columns([3, 1])
+                with col1:
+                    if st.button("➕ Add Education", key="add_edu"):
+                        if 'education' not in st.session_state.resume_data:
+                            st.session_state.resume_data['education'] = []
+                        st.session_state.resume_data['education'].append({
+                            'degree': '',
+                            'institution': '',
+                            'year': '',
+                            'grade': '',
+                            'specialization': ''
+                        })
+                        st.rerun()
                 
                 if 'education' in st.session_state.resume_data and st.session_state.resume_data['education']:
                     for i, edu in enumerate(st.session_state.resume_data['education']):
-                        cols = st.columns([2, 2, 1, 1, 0.5])
-                        with cols[0]:
-                            edu['degree'] = st.text_input("Degree", edu['degree'], key=f"edu_deg_{i}")
-                        with cols[1]:
-                            edu['institution'] = st.text_input("Institution", edu['institution'], key=f"edu_inst_{i}")
-                        with cols[2]:
-                            edu['year'] = st.text_input("Year", edu['year'], key=f"edu_year_{i}")
-                        with cols[3]:
-                            edu['grade'] = st.text_input("Grade", edu.get('grade', ''), key=f"edu_grade_{i}")
-                        with cols[4]:
-                            if st.button("🗑️", key=f"del_edu_{i}"):
-                                st.session_state.resume_data['education'].pop(i)
-                                st.rerun()
-                        st.markdown("---")
+                        with st.container():
+                            st.markdown(f"**Education #{i+1}**")
+                            
+                            # Flexible fields - user can enter anything
+                            col1, col2 = st.columns(2)
+                            with col1:
+                                edu['degree'] = st.text_input("Degree/Certificate/Qualification", edu.get('degree', ''), key=f"edu_deg_{i}")
+                                edu['institution'] = st.text_input("Institution/School", edu.get('institution', ''), key=f"edu_inst_{i}")
+                            with col2:
+                                edu['year'] = st.text_input("Year/Period", edu.get('year', ''), key=f"edu_year_{i}")
+                                edu['grade'] = st.text_input("Grade/Score (optional)", edu.get('grade', ''), key=f"edu_grade_{i}")
+                            
+                            edu['specialization'] = st.text_input("Specialization/Field (optional)", edu.get('specialization', ''), key=f"edu_spec_{i}")
+                            
+                            col_del1, col_del2 = st.columns([5, 1])
+                            with col_del2:
+                                if st.button("🗑️ Delete", key=f"del_edu_{i}"):
+                                    st.session_state.resume_data['education'].pop(i)
+                                    st.rerun()
+                            st.markdown("---")
                 else:
-                    st.info("No education entries. Click 'Add Education' to create one.")
+                    st.info("No education entries. Click 'Add Education' to create one. You can enter any type of qualification (degree, diploma, certificate, etc.)")
             
             with tab2:
                 st.markdown("### Work Experience")
@@ -1368,25 +1573,27 @@ def main():
                 
                 if 'experience' in st.session_state.resume_data and st.session_state.resume_data['experience']:
                     for i, exp in enumerate(st.session_state.resume_data['experience']):
-                        cols = st.columns([2, 2, 1, 1])
-                        with cols[0]:
-                            exp['company'] = st.text_input("Company", exp['company'], key=f"exp_comp_{i}")
-                        with cols[1]:
-                            exp['position'] = st.text_input("Position", exp['position'], key=f"exp_pos_{i}")
-                        with cols[2]:
-                            exp['start_date'] = st.text_input("Start", exp['start_date'], key=f"exp_start_{i}")
-                        with cols[3]:
-                            if st.button("🗑️", key=f"del_exp_{i}"):
-                                st.session_state.resume_data['experience'].pop(i)
-                                st.rerun()
-                        
-                        exp['location'] = st.text_input("Location", exp['location'], key=f"exp_loc_{i}")
-                        exp['end_date'] = st.text_input("End Date", exp['end_date'], key=f"exp_end_{i}")
-                        
-                        desc_text = "\n".join(exp['description']) if exp['description'] else ""
-                        new_desc = st.text_area("Description (one per line)", desc_text, key=f"exp_desc_{i}", height=80)
-                        exp['description'] = [d.strip() for d in new_desc.split('\n') if d.strip()]
-                        st.markdown("---")
+                        with st.container():
+                            st.markdown(f"**Experience #{i+1}**")
+                            cols = st.columns([2, 2, 1, 1])
+                            with cols[0]:
+                                exp['company'] = st.text_input("Company", exp.get('company', ''), key=f"exp_comp_{i}")
+                            with cols[1]:
+                                exp['position'] = st.text_input("Position", exp.get('position', ''), key=f"exp_pos_{i}")
+                            with cols[2]:
+                                exp['start_date'] = st.text_input("Start", exp.get('start_date', ''), key=f"exp_start_{i}")
+                            with cols[3]:
+                                if st.button("🗑️", key=f"del_exp_{i}"):
+                                    st.session_state.resume_data['experience'].pop(i)
+                                    st.rerun()
+                            
+                            exp['location'] = st.text_input("Location", exp.get('location', ''), key=f"exp_loc_{i}")
+                            exp['end_date'] = st.text_input("End Date", exp.get('end_date', ''), key=f"exp_end_{i}")
+                            
+                            desc_text = "\n".join(exp['description']) if exp['description'] else ""
+                            new_desc = st.text_area("Description (one per line)", desc_text, key=f"exp_desc_{i}", height=80)
+                            exp['description'] = [d.strip() for d in new_desc.split('\n') if d.strip()]
+                            st.markdown("---")
                 else:
                     st.info("No experience entries. Click 'Add Experience' to create one.")
             
@@ -1406,11 +1613,11 @@ def main():
                     for i, cert in enumerate(st.session_state.resume_data['certifications']):
                         cols = st.columns([2, 2, 1, 0.5])
                         with cols[0]:
-                            cert['name'] = st.text_input("Name", cert['name'], key=f"cert_name_{i}")
+                            cert['name'] = st.text_input("Name", cert.get('name', ''), key=f"cert_name_{i}")
                         with cols[1]:
-                            cert['issuer'] = st.text_input("Issuer", cert['issuer'], key=f"cert_issuer_{i}")
+                            cert['issuer'] = st.text_input("Issuer", cert.get('issuer', ''), key=f"cert_issuer_{i}")
                         with cols[2]:
-                            cert['year'] = st.text_input("Year", cert['year'], key=f"cert_year_{i}")
+                            cert['year'] = st.text_input("Year", cert.get('year', ''), key=f"cert_year_{i}")
                         with cols[3]:
                             if st.button("🗑️", key=f"del_cert_{i}"):
                                 st.session_state.resume_data['certifications'].pop(i)
@@ -1446,7 +1653,7 @@ def main():
                     for i, lang in enumerate(st.session_state.resume_data['languages']):
                         cols = st.columns([2, 2, 0.5])
                         with cols[0]:
-                            lang['name'] = st.text_input("Language", lang['name'], key=f"lang_name_{i}")
+                            lang['name'] = st.text_input("Language", lang.get('name', ''), key=f"lang_name_{i}")
                         with cols[1]:
                             lang['proficiency'] = st.selectbox("Proficiency", 
                                 ['Native', 'Fluent', 'Professional', 'Intermediate', 'Basic'],
@@ -1476,7 +1683,6 @@ def main():
                         ['', 'Married', 'Unmarried', 'Divorced', 'Widowed'].index(st.session_state.resume_data['personal_details']['marital_status']))
                     nationality = st.text_input("Nationality", st.session_state.resume_data['personal_details'].get('nationality', ''))
                 
-                # Update session state
                 st.session_state.resume_data['personal_details']['father_name'] = father_name
                 st.session_state.resume_data['personal_details']['dob'] = dob
                 st.session_state.resume_data['personal_details']['marital_status'] = marital_status
@@ -1484,7 +1690,7 @@ def main():
     
     st.markdown("""
     <div class="footer">
-        <p>✅ 105 Templates • 3 Styles • Photo Upload • PDF & Word Download • All Sections</p>
+        <p>✅ 105 Built-in Templates • Create Unlimited Custom Templates • Photo Upload • PDF & Word Download • All Sections</p>
     </div>
     """, unsafe_allow_html=True)
 
